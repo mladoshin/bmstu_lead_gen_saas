@@ -1,0 +1,255 @@
+{
+  "name": "AI PR Code Review",
+  "nodes": [
+    {
+      "parameters": {
+        "events": ["pull_request"],
+        "owner": "={{ $parameter.owner }}",
+        "repository": "={{ $parameter.repository }}"
+      },
+      "id": "trigger-node",
+      "name": "GitHub Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "credentials": {
+        "githubApi": {
+          "id": "GITHUB_CREDENTIALS_ID",
+          "name": "GitHub PAT"
+        }
+      },
+      "notes": "Слушает события pull_request (opened, synchronize)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-action",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "opened",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "conditions2": {
+          "conditions": [
+            {
+              "id": "condition-action-sync",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "synchronize",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "filter-node",
+      "name": "Filter PR Actions",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "notes": "Пропускает только opened и synchronize"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/{{ $('GitHub Trigger').item.json.body.repository.full_name }}/pulls/{{ $('GitHub Trigger').item.json.body.number }}/files",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "get-diff-node",
+      "name": "Get PR Files Diff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GITHUB_HTTP_AUTH_ID",
+          "name": "GitHub Bearer Token"
+        }
+      },
+      "notes": "Получает список файлов и diff из PR"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Собираем diff из всех файлов PR\nconst files = $input.first().json;\nconst prData = $('GitHub Trigger').first().json.body;\n\n// Если files — массив (ответ API), обрабатываем\nconst fileList = Array.isArray(files) ? files : (files.body ? JSON.parse(files.body) : [files]);\n\nlet diffText = '';\nlet fileCount = 0;\n\nfor (const file of fileList) {\n  if (file.patch) {\n    diffText += `\\n### File: ${file.filename} (${file.status})\\n`;\n    diffText += '```diff\\n' + file.patch + '\\n```\\n';\n    fileCount++;\n  }\n}\n\n// Ограничиваем размер diff (OpenAI имеет лимит токенов)\nconst MAX_CHARS = 12000;\nif (diffText.length > MAX_CHARS) {\n  diffText = diffText.substring(0, MAX_CHARS) + '\\n\\n... (diff обрезан из-за большого размера)';\n}\n\nreturn [{\n  json: {\n    diff: diffText,\n    fileCount: fileCount,\n    prTitle: prData.pull_request.title,\n    prNumber: prData.number,\n    prAuthor: prData.pull_request.user.login,\n    repoFullName: prData.repository.full_name\n  }\n}];"
+      },
+      "id": "prepare-diff-node",
+      "name": "Prepare Diff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "notes": "Собирает и форматирует diff для отправки в OpenAI"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "content": "=Ты — опытный код-ревьюер в команде разработки. Проанализируй diff из Pull Request и дай структурированный отзыв на русском языке.\n\nФормат ответа:\n## Общая оценка\nКраткая оценка PR в 1-2 предложения.\n\n## Найденные проблемы\nСписок проблем (баги, уязвимости, ошибки логики). Если нет — напиши \"Критических проблем не найдено\".\n\n## Стиль кода\nЗамечания по стилю, именованию, форматированию.\n\n## Рекомендации\nПредложения по улучшению кода.\n\nБудь конкретным: указывай имена файлов и строки. Не придумывай проблемы, если код хороший — так и напиши.",
+              "role": "system"
+            },
+            {
+              "content": "=PR #{{ $json.prNumber }}: \"{{ $json.prTitle }}\" от {{ $json.prAuthor }}\n\nФайлов изменено: {{ $json.fileCount }}\n\nDiff:\n{{ $json.diff }}",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.3
+        }
+      },
+      "id": "openai-node",
+      "name": "OpenAI Code Review",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.8,
+      "position": [1120, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "OPENAI_CREDENTIALS_ID",
+          "name": "OpenAI API Key"
+        }
+      },
+      "notes": "Отправляет diff в OpenAI для анализа"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/{{ $('Prepare Diff').item.json.repoFullName }}/issues/{{ $('Prepare Diff').item.json.prNumber }}/comments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"body\": \"🤖 **AI Code Review** (автоматическое ревью)\\n\\n{{ $json.message.content.replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}",
+        "options": {}
+      },
+      "id": "post-comment-node",
+      "name": "Post Review Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GITHUB_HTTP_AUTH_ID",
+          "name": "GitHub Bearer Token"
+        }
+      },
+      "notes": "Публикует результат ревью как комментарий в PR"
+    }
+  ],
+  "connections": {
+    "GitHub Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter PR Actions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter PR Actions": {
+      "main": [
+        [
+          {
+            "node": "Get PR Files Diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PR Files Diff": {
+      "main": [
+        [
+          {
+            "node": "Prepare Diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Diff": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Code Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Code Review": {
+      "main": [
+        [
+          {
+            "node": "Post Review Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "CI/CD",
+      "id": "1"
+    },
+    {
+      "name": "Code Review",
+      "id": "2"
+    }
+  ],
+  "pinData": {}
+}
