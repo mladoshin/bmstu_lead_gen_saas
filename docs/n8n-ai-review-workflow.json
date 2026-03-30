@@ -37,8 +37,6 @@
       "parameters": {
         "method": "POST",
         "url": "=https://api.github.com/repos/{{ $('Extract PR Metadata').item.json.repoFullName }}/issues/{{ $('Extract PR Metadata').item.json.prNumber }}/comments",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "=Bearer {{ $('Get installation token').item.json.token }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -65,12 +63,6 @@
         2416,
         0
       ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "AaZ4pvmtc5NOJAKr",
-          "name": "Header Auth account"
-        }
-      },
       "notes": "Публикует результат ревью как комментарий в PR"
     },
     {
@@ -90,14 +82,16 @@
     {
       "parameters": {
         "url": "=https://api.github.com/repos/{{ $('Extract PR Metadata').item.json.repoFullName }}/pulls/{{ $('Extract PR Metadata').item.json.prNumber }}/files",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "=Bearer {{ $json.token }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Accept",
               "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.token }}"
             }
           ]
         },
@@ -117,12 +111,6 @@
         1168,
         0
       ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "AaZ4pvmtc5NOJAKr",
-          "name": "Header Auth account"
-        }
-      },
       "notes": "Получает список файлов и diff из PR"
     },
     {
