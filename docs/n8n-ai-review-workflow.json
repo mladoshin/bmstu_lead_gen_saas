@@ -1,0 +1,372 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "mladoshin",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "bmstu_lead_gen_saas",
+          "mode": "name"
+        },
+        "events": [
+          "pull_request"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "58c93c9a-5a63-4d8b-a947-97f479657ec0",
+      "name": "Github Trigger",
+      "webhookId": "31902fe3-84db-48e4-9903-7f98d44b0930",
+      "credentials": {
+        "githubApi": {
+          "id": "ba0eiJpJClqgZ5tp",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/{{ $('Extract PR Metadata').item.json.repoFullName }}/issues/{{ $('Extract PR Metadata').item.json.prNumber }}/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get installation token').item.json.token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ body: $json.body }) }}",
+        "options": {}
+      },
+      "id": "5ed91ff3-ca85-4059-ae7b-d9e9c1ae5901",
+      "name": "Post Review Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2416,
+        0
+      ],
+      "notes": "Публикует результат ревью как комментарий в PR"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Собираем diff из всех файлов PR\nconst files = $input.all().map(i => i.json);\nconst meta = $('Extract PR Metadata').first().json;\n\nlet diffText = '';\nlet fileCount = 0;\n\nfor (const file of files) {\n  if (file.patch) {\n    diffText += `\\n### File: ${file.filename} (${file.status})\\n`;\n    diffText += '```diff\\n' + file.patch + '\\n```\\n';\n    fileCount++;\n  }\n}\n\n// Ограничиваем размер diff (OpenAI имеет лимит токенов)\nconst MAX_CHARS = 12000;\nif (diffText.length > MAX_CHARS) {\n  diffText = diffText.substring(0, MAX_CHARS) + '\\n\\n... (diff обрезан из-за большого размера)';\n}\n\nreturn [{\n  json: {\n    diff: diffText,\n    fileCount: fileCount,\n    prTitle: meta.prTitle,\n    prNumber: meta.prNumber,\n    prAuthor: meta.prAuthor,\n    repoFullName: meta.repoFullName\n  }\n}];"
+      },
+      "id": "ee8b8412-1c9d-4a98-87f9-89ab9b5d55e9",
+      "name": "Prepare Diff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        0
+      ],
+      "notes": "Собирает и форматирует diff для отправки в OpenAI"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $('Extract PR Metadata').item.json.repoFullName }}/pulls/{{ $('Extract PR Metadata').item.json.prNumber }}/files",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.token }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "76716540-834e-4b4a-ad9a-f328ae5f8e69",
+      "name": "Get PR Files Diff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1168,
+        0
+      ],
+      "notes": "Получает список файлов и diff из PR"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Сохраняем PR-метаданные и передаём дальше\nconst body = $input.first().json.body;\nreturn [{\n  json: {\n    prNumber: body.number,\n    prTitle: body.pull_request.title,\n    prAuthor: body.pull_request.user.login,\n    repoFullName: body.repository.full_name\n  }\n}];"
+      },
+      "id": "624a791a-54f5-41cb-8fa6-20a164d6898a",
+      "name": "Extract PR Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "notes": "Извлекает метаданные PR для использования далее"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition-action",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "opened",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b831a20a-3fd4-4527-88dc-6e21535b3877",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "synchronize",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "09da540d-57e6-4a3f-a6f1-e251510dd82a",
+      "name": "Filter PR Actions",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "Пропускает только opened и synchronize"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5.4-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Ты — опытный код-ревьюер в команде разработки. Проанализируй diff из Pull Request и дай структурированный отзыв на русском языке.                                                                                                             \n                                                                                                                                                                                                                                              \n  Формат ответа:                                                                                                                                                                                                                                \n  ## Общая оценка                                                                                                                                                                                                                               \n  Краткая оценка PR в 1-2 предложения.                                                                                                                                                                                                          \n                                      \n  ## Найденные проблемы                                                                                                                                                                                                                         \n  Список проблем (баги, уязвимости, ошибки логики). Если нет — напиши \"Критических проблем не найдено\".                                                                                                                                         \n                                                                                                                                                                                                                                                \n  ## Стиль кода                                                                                                                                                                                                                                 \n  Замечания по стилю, именованию, форматированию.\n                                                                                                                                                                                                                                                \n  ## Рекомендации                                                                                                                                                                                                                               \n  Предложения по улучшению кода.   \n                                                                                                                                                                                                                                                \n  Будь конкретным: указывай имена файлов и строки. Не придумывай проблемы, если код хороший — так и напиши."
+            },
+            {
+              "content": "=PR #{{ $json.prNumber }}: \"{{ $json.prTitle }}\" от {{ $json.prAuthor }}\n\nФайлов изменено:\n{{ $json.fileCount }}\n\nDiff:\n{{ $json.diff }}   "
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "3a2047ac-7b59-41fd-ab49-0cbf0f84101c",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "CgwbfnTDOZDNRlUI",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const reviewText = $input.first().json.output[0].content[0].text\nreturn [{\n  json: {\n    body: \"🤖 **AI Code Review** (автоматическое ревью)\\n\\n\" + reviewText\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        0
+      ],
+      "id": "ebc9a51e-0f42-49d1-8a0a-b54fe0814c83",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/app/installations/120176714/access_tokens",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get jwt').item.json.jwt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "faa735c4-b6e3-4e5e-b5d7-2973d5932834",
+      "name": "Get installation token"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\n  const appId = '3226690';\n  const privateKey = `***`;\n\n  const now = Math.floor(Date.now() / 1000);\n  const payload = {\n    iat: now - 60,\n    exp: now + (10 * 60),\n    iss: appId\n  };\n\n  // Кодируем header и payload в base64url\n  function base64url(obj) {\n    return Buffer.from(JSON.stringify(obj))\n      .toString('base64')\n      .replace(/=/g, '')\n      .replace(/\\+/g, '-')\n      .replace(/\\//g, '_');\n  }\n\n  const header = base64url({ alg: 'RS256', typ: 'JWT' });\n  const body = base64url(payload);\n  const signature = crypto\n    .createSign('RSA-SHA256')\n    .update(`${header}.${body}`)\n    .sign(privateKey, 'base64')\n    .replace(/=/g, '')\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_');\n\n  const jwt = `${header}.${body}.${signature}`;\n\n  return [{ json: { jwt } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "df226a67-bef0-4592-8a33-442bb3bd93f2",
+      "name": "Get jwt"
+    }
+  ],
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter PR Actions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Diff": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PR Files Diff": {
+      "main": [
+        [
+          {
+            "node": "Prepare Diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PR Metadata": {
+      "main": [
+        [
+          {
+            "node": "Get jwt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter PR Actions": {
+      "main": [
+        [
+          {
+            "node": "Extract PR Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Post Review Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get installation token": {
+      "main": [
+        [
+          {
+            "node": "Get PR Files Diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get jwt": {
+      "main": [
+        [
+          {
+            "node": "Get installation token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "96b414bb0bbbcac8424c44e8559534b2913e03b06f708164fa018fe7cede534f"
+  }
+}
