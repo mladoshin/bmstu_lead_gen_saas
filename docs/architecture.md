@@ -3,15 +3,16 @@
 ## Общая схема
 
 ```
-                              ┌──────────────────┐
-                              │  Google Maps API  │
-                              └────────┬─────────┘
-┌─────────────┐     ┌──────────────┐   │   ┌──────────────┐
-│  Frontend   │────▶│   Backend    │───┼──▶│  OpenAI API  │
-│  React SPA  │◀────│   NestJS     │   │   └──────────────┘
-└─────────────┘     └──────┬───────┘   │   ┌──────────────┐
-                           │           └──▶│  Grok AI API │
-                    ┌──────▼───────┐       └──────────────┘
+                        Источники данных         AI-сервисы (обогащение/обработка)
+                       ┌──────────────────┐      ┌──────────────┐
+                       │  Google Maps API │      │  OpenAI API  │
+                       └────────┬─────────┘      └──────┬───────┘
+┌─────────────┐     ┌──────────┴───┐                    │
+│  Frontend   │────▶│   Backend    │────────────────────┤
+│  React SPA  │◀────│   NestJS     │                    │
+└─────────────┘     └──────┬───────┘             ┌──────┴───────┐
+                           │                     │  Grok AI API │
+                    ┌──────▼───────┐             └──────────────┘
                     │  PostgreSQL  │
                     │   (Prisma)   │
                     └──────────────┘
@@ -47,7 +48,7 @@ bmstu_lead_gen_saas/
 | `auth` | Регистрация, авторизация, JWT |
 | `companies` | CRUD компаний |
 | `contacts` | CRUD контактов ЛПР |
-| `search` | Поиск компаний через множество источников (Google Maps, OpenAI, Grok AI), извлечение доменов |
+| `search` | Поиск компаний через Google Maps/Places API, обогащение через LLM, извлечение доменов |
 | `email-generation` | Генерация email по паттернам (firstname@domain, f.lastname@domain и т.д.) |
 | `verification` | Верификация email: MX check, SMTP handshake, catch-all detection |
 | `export` | Экспорт компаний и контактов в CSV по выборке |
@@ -56,8 +57,9 @@ bmstu_lead_gen_saas/
 
 - Frontend общается с Backend через REST API
 - Backend использует Prisma ORM для работы с PostgreSQL
-- Поиск компаний осуществляется через pipeline из 5 этапов с использованием Google Maps/Places API, OpenAI API и Grok AI API
-- Для классификации должностей и поиска контактов ЛПР используются AI-модели (OpenAI, Grok AI)
+- Поиск компаний осуществляется через Google Maps/Places API (единственный источник), LLM используются для обогащения и обработки данных
+- Поиск ЛПР выполняется через LLM с функцией web search (OpenAI, Grok AI)
+- LLM также используются для классификации должностей, нормализации данных и предсказания email-паттернов
 - Аутентификация через JWT-токены
 
 ## Архитектура бэкенда (Clean Architecture)
@@ -265,7 +267,7 @@ Core не импортирует ни React, ни Axios, ни Zustand — тол
 | email_general | VARCHAR, NULL | Общий email компании |
 | country | VARCHAR, NULL | Страна |
 | address | VARCHAR, NULL | Адрес |
-| source | VARCHAR | Источник данных (google_maps, openai, grok_ai) |
+| source | VARCHAR | Источник данных (google_maps) |
 | created_at | TIMESTAMP | Дата создания |
 
 ### Contact
@@ -325,23 +327,29 @@ Pipeline состоит из 5 последовательных этапов:
 1. Пользователь указывает параметры: cities[] (массив городов), industry (отрасль), company_limit (лимит)
 2. Frontend отправляет POST `/api/search/companies`
 3. Backend создаёт Selection (status: `pending`)
-4. Backend параллельно запрашивает компании из нескольких источников: Google Maps/Places API, OpenAI API (с поиском), Grok AI API (с поиском)
-5. Результаты агрегируются, извлекаются домены из website, выполняется дедупликация
-6. Создаются записи Company, привязанные к Selection
+4. Backend запрашивает компании через **Google Maps/Places API** (единственный источник данных о компаниях)
+5. Извлекаются домены из website, выполняется дедупликация
+6. **Обогащение через LLM** (OpenAI / Grok AI):
+   - Нормализация названий компаний
+   - Уточнение/определение отрасли
+   - Извлечение данных со страниц "О компании", "Контакты" сайтов компаний (парсинг HTML → LLM → структурированные данные)
+7. Создаются записи Company, привязанные к Selection
 
 ### Этап 2. Поиск контактов/ЛПР (Contact Discovery)
 
 1. Пользователь запускает POST `/api/contacts/discover` с selectionId и target_roles[]
-2. Backend ищет контактных лиц по каждой компании через AI-модели и открытые источники
-3. AI классифицирует должности по уровням (seniority): C-level, VP, Director, Manager
-4. Создаются записи Contact с полями firstName, lastName, position, seniority, source
+2. Для каждой компании: LLM (OpenAI / Grok AI) с функцией **web search** ищут сотрудников по запросу вида `"{company_name}" + "{target_role}" site:linkedin.com OR kontakt`
+3. LLM парсит результаты поиска, извлекает: имя, фамилию, должность, ссылки (LinkedIn и др.)
+4. LLM **классифицирует** должности по уровням (seniority): C-level, VP, Director, Manager
+5. Дедупликация контактов
+6. Создаются записи Contact с полями firstName, lastName, position, seniority, source, confidence_score
 
 ### Этап 3. Генерация email (Email Generation)
 
 1. Пользователь запускает POST `/api/email/generate` с selectionId
-2. Backend генерирует email-адреса по паттернам на основе имени контакта и домена компании
-3. Паттерны: firstname@domain, lastname@domain, f.lastname@domain, firstname.lastname@domain и др.
-4. Наиболее вероятный вариант записывается в поле email контакта
+2. LLM анализирует домен/компанию и **предсказывает наиболее вероятный паттерн** email (вместо простого перебора)
+3. Генерация вариантов email на основе имени контакта и домена: firstname@domain, lastname@domain, f.lastname@domain, firstname.lastname@domain и др.
+4. Варианты ранжируются по вероятности, наиболее вероятный записывается в поле email контакта
 
 ### Этап 4. Верификация email (Email Verification)
 
