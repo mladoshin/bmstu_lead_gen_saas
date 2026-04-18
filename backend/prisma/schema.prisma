@@ -45,6 +45,7 @@ model Selection {
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   companies    Company[]
 
+  @@index([userId])
   @@map("selections")
 }
 
@@ -67,6 +68,8 @@ model Company {
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   contacts     Contact[]
 
+  @@index([selectionId])
+  @@index([userId])
   @@map("companies")
 }
 
@@ -89,6 +92,8 @@ model Contact {
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   emailVerification EmailVerification?
 
+  @@index([companyId])
+  @@index([userId])
   @@map("contacts")
 }
 
