@@ -2,13 +2,7 @@ import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { IUserRepository, USER_REPOSITORY_TOKEN } from '../repositories/user.repository';
-import { UserProfile } from '../domain/user.entity';
-import { AuthResult } from './register.use-case';
-
-export interface LoginInput {
-  email: string;
-  password: string;
-}
+import { LoginInput, AuthResult } from '../types/auth.types';
 
 @Injectable()
 export class LoginUseCase {

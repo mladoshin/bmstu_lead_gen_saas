@@ -2,18 +2,7 @@ import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { IUserRepository, USER_REPOSITORY_TOKEN } from '../repositories/user.repository';
-import { UserProfile } from '../domain/user.entity';
-
-export interface RegisterInput {
-  email: string;
-  password: string;
-  name: string;
-}
-
-export interface AuthResult {
-  accessToken: string;
-  user: UserProfile;
-}
+import { RegisterInput, AuthResult } from '../types/auth.types';
 
 @Injectable()
 export class RegisterUseCase {

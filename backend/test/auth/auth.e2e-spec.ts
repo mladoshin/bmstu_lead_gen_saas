@@ -38,7 +38,7 @@ describe('Auth (e2e)', () => {
     prisma = moduleFixture.get<PrismaService>(PrismaService);
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await prisma.user.deleteMany();
   });
 
