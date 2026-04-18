@@ -23,12 +23,19 @@ export interface CreateSelectionData {
   status?: SelectionStatus;
 }
 
-export interface ISelectionRepository {
+export interface ISelectionReader {
   findById(id: string): Promise<SelectionEntity | null>;
   findByUserId(userId: string): Promise<SelectionEntity[]>;
+}
+
+export interface ISelectionWriter {
   create(data: CreateSelectionData): Promise<SelectionEntity>;
   updateStatus(id: string, status: SelectionStatus): Promise<SelectionEntity>;
   delete(id: string): Promise<void>;
 }
 
+export interface ISelectionRepository extends ISelectionReader, ISelectionWriter {}
+
+export const SELECTION_READER_TOKEN = 'ISelectionReader';
+export const SELECTION_WRITER_TOKEN = 'ISelectionWriter';
 export const SELECTION_REPOSITORY_TOKEN = 'ISelectionRepository';
