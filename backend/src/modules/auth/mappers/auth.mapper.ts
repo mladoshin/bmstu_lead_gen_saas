@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from '../repositories/user.repository';
+import { UserEntity, UserProfile } from '../domain/user.entity';
 
 @Injectable()
 export class AuthMapper {
-  toProfile(user: UserEntity) {
+  toProfile(user: UserEntity): UserProfile {
     return {
       id: user.id,
       email: user.email,
