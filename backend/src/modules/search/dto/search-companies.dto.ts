@@ -1,4 +1,4 @@
-import { IsArray, IsString, IsInt, Min, Max } from 'class-validator';
+import { IsArray, IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
 
 export class SearchCompaniesDto {
   @IsArray()
@@ -12,4 +12,9 @@ export class SearchCompaniesDto {
   @Min(1)
   @Max(500)
   companyLimit: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  targetRoles?: string[];
 }

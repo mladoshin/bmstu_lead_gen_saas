@@ -69,7 +69,7 @@ describe('Selections (e2e)', () => {
       expect(res.body).toHaveProperty('industry', VALID_SEARCH_DTO.industry);
       expect(res.body).toHaveProperty('cities');
       expect(res.body).toHaveProperty('companyLimit', VALID_SEARCH_DTO.companyLimit);
-      expect(res.body).toHaveProperty('status', 'pending');
+      expect(res.body).toHaveProperty('status', 'in_progress');
       expect(res.body).toHaveProperty('createdAt');
     });
 
@@ -141,7 +141,7 @@ describe('Selections (e2e)', () => {
       expect(res.body).toHaveProperty('industry', VALID_SEARCH_DTO.industry);
       expect(res.body).toHaveProperty('cities');
       expect(res.body).toHaveProperty('companyLimit', VALID_SEARCH_DTO.companyLimit);
-      expect(res.body).toHaveProperty('status', 'pending');
+      expect(res.body).toHaveProperty('status', 'in_progress');
       expect(res.body).toHaveProperty('createdAt');
     });
 
