@@ -20,10 +20,14 @@ import {
   OPENAI_ENRICHMENT_SERVICE_TOKEN,
   OpenAIEnrichmentService,
 } from './services/openai-enrichment.service';
+import {
+  SEARCH_JOB_SERVICE_TOKEN,
+  SearchJobService,
+} from './services/search-job.service';
 import { CompaniesModule } from '../companies/companies.module';
 
 @Module({
-  imports: [HttpModule, CompaniesModule],
+  imports: [HttpModule.register({ timeout: 10_000 }), CompaniesModule],
   controllers: [SearchController, SelectionsController],
   providers: [
     SearchCompaniesUseCase,
@@ -35,6 +39,7 @@ import { CompaniesModule } from '../companies/companies.module';
     { provide: SELECTION_WRITER_TOKEN, useClass: PrismaSelectionRepository },
     { provide: GOOGLE_PLACES_SERVICE_TOKEN, useClass: GooglePlacesService },
     { provide: OPENAI_ENRICHMENT_SERVICE_TOKEN, useClass: OpenAIEnrichmentService },
+    { provide: SEARCH_JOB_SERVICE_TOKEN, useClass: SearchJobService },
   ],
 })
 export class SearchModule {}
