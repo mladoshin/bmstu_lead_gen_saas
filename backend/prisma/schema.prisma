@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SelectionStatus {
+  pending
+  in_progress
+  completed
+  failed
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String      @map("password_hash")
+  name         String
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  selections   Selection[]
+  companies    Company[]
+  contacts     Contact[]
+
+  @@map("users")
+}
+
+model Selection {
+  id           String          @id @default(uuid())
+  userId       String          @map("user_id")
+  name         String
+  industry     String
+  cities       Json
+  companyLimit Int             @map("company_limit")
+  targetRoles  Json            @map("target_roles")
+  status       SelectionStatus @default(pending)
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companies    Company[]
+
+  @@map("selections")
+}
+
+model Company {
+  id           String    @id @default(uuid())
+  selectionId  String    @map("selection_id")
+  userId       String    @map("user_id")
+  name         String
+  industry     String
+  city         String
+  website      String?
+  domain       String?
+  phone        String?
+  emailGeneral String?   @map("email_general")
+  country      String?
+  address      String?
+  source       String
+  createdAt    DateTime  @default(now()) @map("created_at")
+  selection    Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contacts     Contact[]
+
+  @@map("companies")
+}
+
+model Contact {
+  id               String             @id @default(uuid())
+  companyId        String             @map("company_id")
+  userId           String             @map("user_id")
+  firstName        String             @map("first_name")
+  lastName         String             @map("last_name")
+  position         String
+  seniority        String?
+  email            String?
+  phone            String?
+  linkedin         String?
+  telegram         String?
+  confidenceScore  Float?             @map("confidence_score")
+  source           String
+  createdAt        DateTime           @default(now()) @map("created_at")
+  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailVerification EmailVerification?
+
+  @@map("contacts")
+}
+
+model EmailVerification {
+  id              String   @id @default(uuid())
+  contactId       String   @unique @map("contact_id")
+  email           String
+  isValid         Boolean  @map("is_valid")
+  smtpCheck       Boolean? @map("smtp_check")
+  catchAll        Boolean? @map("catch_all")
+  confidenceScore Float?   @map("confidence_score")
+  verifiedAt      DateTime @map("verified_at")
+  contact         Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("email_verifications")
+}
