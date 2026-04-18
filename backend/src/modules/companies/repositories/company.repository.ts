@@ -30,12 +30,23 @@ export interface CreateCompanyData {
   source: string;
 }
 
+export interface UpdateCompanyData {
+  name?: string;
+  industry?: string;
+  city?: string;
+  website?: string;
+  domain?: string;
+  phone?: string;
+  emailGeneral?: string;
+  country?: string;
+  address?: string;
+}
+
 export interface ICompanyRepository {
   findById(id: string): Promise<CompanyEntity | null>;
   findByUserId(userId: string): Promise<CompanyEntity[]>;
-  findBySelectionId(selectionId: string): Promise<CompanyEntity[]>;
   create(data: CreateCompanyData): Promise<CompanyEntity>;
-  update(id: string, data: Partial<CreateCompanyData>): Promise<CompanyEntity>;
+  update(id: string, data: UpdateCompanyData): Promise<CompanyEntity>;
   delete(id: string): Promise<void>;
 }
 

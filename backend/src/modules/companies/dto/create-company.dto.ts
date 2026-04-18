@@ -1,16 +1,19 @@
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateCompanyDto {
   @IsUUID()
   selectionId: string;
 
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @IsString()
+  @IsNotEmpty()
   industry: string;
 
   @IsString()
+  @IsNotEmpty()
   city: string;
 
   @IsOptional()
@@ -38,5 +41,6 @@ export class CreateCompanyDto {
   address?: string;
 
   @IsString()
+  @IsNotEmpty()
   source: string;
 }
