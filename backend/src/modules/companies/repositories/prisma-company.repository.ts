@@ -4,6 +4,7 @@ import {
   ICompanyRepository,
   CompanyEntity,
   CreateCompanyData,
+  UpdateCompanyData,
 } from './company.repository';
 
 @Injectable()
@@ -18,15 +19,11 @@ export class PrismaCompanyRepository implements ICompanyRepository {
     return this.prisma.company.findMany({ where: { userId } });
   }
 
-  async findBySelectionId(selectionId: string): Promise<CompanyEntity[]> {
-    return this.prisma.company.findMany({ where: { selectionId } });
-  }
-
   async create(data: CreateCompanyData): Promise<CompanyEntity> {
     return this.prisma.company.create({ data });
   }
 
-  async update(id: string, data: Partial<CreateCompanyData>): Promise<CompanyEntity> {
+  async update(id: string, data: UpdateCompanyData): Promise<CompanyEntity> {
     return this.prisma.company.update({ where: { id }, data });
   }
 
