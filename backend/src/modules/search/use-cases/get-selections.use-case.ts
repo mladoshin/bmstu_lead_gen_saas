@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ISelectionRepository, SELECTION_REPOSITORY_TOKEN, SelectionEntity } from '../repositories/selection.repository';
+import { ISelectionReader, SELECTION_READER_TOKEN, SelectionEntity } from '../repositories/selection.repository';
 
 @Injectable()
 export class GetSelectionsUseCase {
   constructor(
-    @Inject(SELECTION_REPOSITORY_TOKEN)
-    private readonly selectionRepo: ISelectionRepository,
+    @Inject(SELECTION_READER_TOKEN)
+    private readonly selectionRepo: ISelectionReader,
   ) {}
 
   async execute(userId: string): Promise<SelectionEntity[]> {

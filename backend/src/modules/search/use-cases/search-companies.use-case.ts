@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import {
-  ISelectionRepository,
-  SELECTION_REPOSITORY_TOKEN,
+  ISelectionWriter,
+  SELECTION_WRITER_TOKEN,
   SelectionEntity,
 } from '../repositories/selection.repository';
 import { SearchCompaniesDto } from '../dto/search-companies.dto';
@@ -9,8 +9,8 @@ import { SearchCompaniesDto } from '../dto/search-companies.dto';
 @Injectable()
 export class SearchCompaniesUseCase {
   constructor(
-    @Inject(SELECTION_REPOSITORY_TOKEN)
-    private readonly selectionRepo: ISelectionRepository,
+    @Inject(SELECTION_WRITER_TOKEN)
+    private readonly selectionRepo: ISelectionWriter,
   ) {}
 
   // Stub: actual implementation will call Google Maps API and LLM enrichment
