@@ -2,8 +2,7 @@ import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { IUserRepository, USER_REPOSITORY_TOKEN } from '../repositories/user.repository';
-import { RegisterDto } from '../dto/register.dto';
-import { AuthResponseDto } from '../dto/auth-response.dto';
+import { RegisterInput, AuthResult } from '../types/auth.types';
 
 @Injectable()
 export class RegisterUseCase {
@@ -13,24 +12,24 @@ export class RegisterUseCase {
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(dto: RegisterDto): Promise<AuthResponseDto> {
-    const existing = await this.userRepo.findByEmail(dto.email);
+  async execute(input: RegisterInput): Promise<AuthResult> {
+    const existing = await this.userRepo.findByEmail(input.email);
     if (existing) {
       throw new ConflictException('User with this email already exists');
     }
 
-    const passwordHash = await argon2.hash(dto.password);
+    const passwordHash = await argon2.hash(input.password);
     const user = await this.userRepo.create({
-      email: dto.email,
+      email: input.email,
       passwordHash,
-      name: dto.name,
+      name: input.name,
     });
 
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email });
 
     return {
       accessToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt },
     };
   }
 }

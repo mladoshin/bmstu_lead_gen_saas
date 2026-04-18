@@ -6,7 +6,6 @@ import { AuthController } from './auth.controller';
 import { RegisterUseCase } from './use-cases/register.use-case';
 import { LoginUseCase } from './use-cases/login.use-case';
 import { GetMeUseCase } from './use-cases/get-me.use-case';
-import { AuthMapper } from './mappers/auth.mapper';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { USER_REPOSITORY_TOKEN } from './repositories/user.repository';
 import { PrismaUserRepository } from './repositories/prisma-user.repository';
@@ -28,10 +27,9 @@ import { PrismaUserRepository } from './repositories/prisma-user.repository';
     RegisterUseCase,
     LoginUseCase,
     GetMeUseCase,
-    AuthMapper,
     JwtStrategy,
     { provide: USER_REPOSITORY_TOKEN, useClass: PrismaUserRepository },
   ],
-  exports: [JwtModule, JwtStrategy],
+  exports: [JwtModule],
 })
 export class AuthModule {}

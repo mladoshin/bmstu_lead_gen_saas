@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IUserRepository, USER_REPOSITORY_TOKEN, UserEntity } from '../repositories/user.repository';
+import { IUserRepository, USER_REPOSITORY_TOKEN } from '../repositories/user.repository';
+import { UserProfile } from '../domain/user.entity';
 
 @Injectable()
 export class GetMeUseCase {
@@ -8,11 +9,11 @@ export class GetMeUseCase {
     private readonly userRepo: IUserRepository,
   ) {}
 
-  async execute(userId: string): Promise<UserEntity> {
+  async execute(userId: string): Promise<UserProfile> {
     const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt };
   }
 }

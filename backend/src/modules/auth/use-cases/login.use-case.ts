@@ -2,8 +2,7 @@ import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { IUserRepository, USER_REPOSITORY_TOKEN } from '../repositories/user.repository';
-import { LoginDto } from '../dto/login.dto';
-import { AuthResponseDto } from '../dto/auth-response.dto';
+import { LoginInput, AuthResult } from '../types/auth.types';
 
 @Injectable()
 export class LoginUseCase {
@@ -13,13 +12,13 @@ export class LoginUseCase {
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.userRepo.findByEmail(dto.email);
+  async execute(input: LoginInput): Promise<AuthResult> {
+    const user = await this.userRepo.findByEmail(input.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isValid = await argon2.verify(user.passwordHash, dto.password);
+    const isValid = await argon2.verify(user.passwordHash, input.password);
     if (!isValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -28,7 +27,7 @@ export class LoginUseCase {
 
     return {
       accessToken,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt },
     };
   }
 }
