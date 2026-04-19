@@ -9,8 +9,12 @@ import { DiscoverContactsUseCase } from './use-cases/discover-contacts.use-case'
 import { ContactMapper } from './mappers/contact.mapper';
 import { CONTACT_REPOSITORY_TOKEN } from './repositories/contact.repository';
 import { PrismaContactRepository } from './repositories/prisma-contact.repository';
+import { CONTACT_DISCOVERY_SERVICE_TOKEN } from './services/contact-discovery.service';
+import { OpenAIContactDiscoveryService } from './services/contact-discovery.service';
+import { CompaniesModule } from '../companies/companies.module';
 
 @Module({
+  imports: [CompaniesModule],
   controllers: [ContactsController],
   providers: [
     GetContactsUseCase,
@@ -21,6 +25,7 @@ import { PrismaContactRepository } from './repositories/prisma-contact.repositor
     DiscoverContactsUseCase,
     ContactMapper,
     { provide: CONTACT_REPOSITORY_TOKEN, useClass: PrismaContactRepository },
+    { provide: CONTACT_DISCOVERY_SERVICE_TOKEN, useClass: OpenAIContactDiscoveryService },
   ],
   exports: [CONTACT_REPOSITORY_TOKEN],
 })

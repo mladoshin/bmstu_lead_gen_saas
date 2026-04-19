@@ -92,6 +92,7 @@ model Contact {
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   emailVerification EmailVerification?
 
+  @@unique([companyId, firstName, lastName], map: "contacts_company_name_unique")
   @@index([companyId])
   @@index([userId])
   @@map("contacts")
