@@ -23,6 +23,10 @@ export class PrismaCompanyRepository implements ICompanyRepository {
     return this.prisma.company.findMany({ where: { selectionId } });
   }
 
+  async findBySelectionIdAndUserId(selectionId: string, userId: string): Promise<CompanyEntity[]> {
+    return this.prisma.company.findMany({ where: { selectionId, userId } });
+  }
+
   async create(data: CreateCompanyData): Promise<CompanyEntity> {
     return this.prisma.company.create({ data });
   }
