@@ -25,7 +25,7 @@ export class OpenAIEmailGenerationService implements IEmailGenerationService {
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     if (!apiKey) {
-      this.logger.error('OPENAI_API_KEY is not configured. Email generation will not work.');
+      throw new Error('OPENAI_API_KEY is not configured. Cannot start OpenAIEmailGenerationService.');
     }
     this.client = new OpenAI({ apiKey });
   }
@@ -44,7 +44,7 @@ Consider common corporate email patterns:
 - firstname_lastname@domain (e.g. john_doe@example.com)
 - lastname@domain (e.g. doe@example.com)
 
-Return JSON: {"email": "predicted@email.com", "confidence": 0.0-1.0, "pattern": "pattern_used"}
+Return JSON: {"email": "predicted@email.com", "confidence": 0.0-1.0}
 Use lowercase for the email. Return only the single most likely email.`;
 
     try {

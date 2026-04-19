@@ -32,28 +32,24 @@ export class GenerateEmailsUseCase {
     let processed = 0;
     let updated = 0;
 
-    const companies = await this.companyRepo.findBySelectionId(dto.selectionId);
+    const companies = await this.companyRepo.findBySelectionIdAndUserId(dto.selectionId, userId);
 
     for (const company of companies) {
-      if (company.userId !== userId) {
+      const domain = this.extractDomain(company);
+      if (!domain) {
         continue;
       }
 
-      try {
-        const domain = this.extractDomain(company);
-        if (!domain) {
+      const contacts = await this.contactRepo.findByCompanyId(company.id);
+
+      for (const contact of contacts) {
+        if (contact.email) {
           continue;
         }
 
-        const contacts = await this.contactRepo.findByCompanyId(company.id);
+        processed++;
 
-        for (const contact of contacts) {
-          if (contact.email) {
-            continue;
-          }
-
-          processed++;
-
+        try {
           const result = await this.emailGenerationService.generateEmail(
             { firstName: contact.firstName, lastName: contact.lastName },
             domain,
@@ -63,11 +59,11 @@ export class GenerateEmailsUseCase {
             await this.contactRepo.update(contact.id, { email: result.email });
             updated++;
           }
+        } catch (err) {
+          this.logger.error(
+            `Email generation failed for contact "${contact.firstName} ${contact.lastName}" (company "${company.name}"): ${(err as Error).message}`,
+          );
         }
-      } catch (err) {
-        this.logger.error(
-          `Email generation failed for company "${company.name}": ${(err as Error).message}`,
-        );
       }
     }
 
