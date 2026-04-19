@@ -49,9 +49,11 @@ export class OpenAIContactDiscoveryService implements IContactDiscoveryService {
   private client: OpenAI;
 
   constructor(private readonly configService: ConfigService) {
-    this.client = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
+    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    if (!apiKey) {
+      this.logger.error('OPENAI_API_KEY is not configured. Contact discovery will not work.');
+    }
+    this.client = new OpenAI({ apiKey });
   }
 
   async discoverContacts(
@@ -90,7 +92,15 @@ If no contacts found, return {"contacts": []}.`;
       });
 
       const content = response.output_text;
-      const parsed = JSON.parse(content) as { contacts?: unknown[] };
+
+      let parsed: { contacts?: unknown[] };
+      try {
+        parsed = JSON.parse(content) as { contacts?: unknown[] };
+      } catch {
+        this.logger.error(`Failed to parse OpenAI response as JSON for company "${company.name}": ${content.substring(0, 200)}`);
+        return [];
+      }
+
       const rawContacts = parsed.contacts ?? [];
 
       const validContacts: DiscoveredContact[] = [];

@@ -21,6 +21,7 @@ export class DiscoverContactsUseCase {
     const companies = await this.companyRepo.findBySelectionId(dto.selectionId);
 
     if (!companies.length) {
+      this.logger.warn(`No companies found for selectionId=${dto.selectionId}`);
       return [];
     }
 
@@ -41,33 +42,48 @@ export class DiscoverContactsUseCase {
           dto.targetRoles,
         );
 
-        for (const contact of discovered) {
-          const existing = await this.contactRepo.findByCompanyIdAndFullName(
-            company.id,
-            contact.firstName,
-            contact.lastName,
-          );
+        if (!discovered.length) {
+          continue;
+        }
 
-          if (existing) {
+        const existingContacts = await this.contactRepo.findByCompanyId(company.id);
+        const existingKeys = new Set(
+          existingContacts.map((c) => `${c.firstName}\0${c.lastName}`),
+        );
+
+        for (const contact of discovered) {
+          const key = `${contact.firstName}\0${contact.lastName}`;
+          if (existingKeys.has(key)) {
             continue;
           }
 
-          const created = await this.contactRepo.create({
-            companyId: company.id,
-            userId,
-            firstName: contact.firstName,
-            lastName: contact.lastName,
-            position: contact.position,
-            seniority: contact.seniority,
-            email: contact.email,
-            phone: contact.phone,
-            linkedin: contact.linkedin,
-            telegram: contact.telegram,
-            confidenceScore: contact.confidenceScore,
-            source: 'openai_web_search',
-          });
+          try {
+            const created = await this.contactRepo.create({
+              companyId: company.id,
+              userId,
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+              position: contact.position,
+              seniority: contact.seniority,
+              email: contact.email,
+              phone: contact.phone,
+              linkedin: contact.linkedin,
+              telegram: contact.telegram,
+              confidenceScore: contact.confidenceScore,
+              source: 'openai_web_search',
+            });
 
-          createdContacts.push(created);
+            createdContacts.push(created);
+            existingKeys.add(key);
+          } catch (createErr) {
+            if ((createErr as any)?.code === 'P2002') {
+              this.logger.debug(
+                `Duplicate contact skipped (unique constraint): ${contact.firstName} ${contact.lastName} for company "${company.name}"`,
+              );
+            } else {
+              throw createErr;
+            }
+          }
         }
       } catch (err) {
         this.logger.error(
