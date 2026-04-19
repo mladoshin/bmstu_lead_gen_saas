@@ -45,6 +45,7 @@ export interface UpdateCompanyData {
 export interface ICompanyRepository {
   findById(id: string): Promise<CompanyEntity | null>;
   findByUserId(userId: string): Promise<CompanyEntity[]>;
+  findBySelectionId(selectionId: string): Promise<CompanyEntity[]>;
   create(data: CreateCompanyData): Promise<CompanyEntity>;
   update(id: string, data: UpdateCompanyData): Promise<CompanyEntity>;
   delete(id: string): Promise<void>;
