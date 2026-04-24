@@ -3,8 +3,7 @@ import type { Selection } from '@/core/entities/selection';
 import type { ISearchPort } from '@/core/ports/search.port';
 import type { ISelectionPort } from '@/core/ports/selection.port';
 import type { SearchCompaniesRequest } from '@/core/types/search.types';
-import type { ApiError } from '@/core/types/auth.types';
-import { AxiosError } from 'axios';
+import { normalizeError } from '@/core/utils/normalize-error';
 
 interface SelectionState {
   currentSelection: Selection | null;
@@ -14,17 +13,6 @@ interface SelectionState {
   pollSelection: () => Promise<void>;
   reset: () => void;
   clearError: () => void;
-}
-
-function normalizeError(err: unknown): string {
-  if (err instanceof AxiosError && err.response?.data) {
-    const data = err.response.data as ApiError;
-    if (Array.isArray(data.message)) {
-      return data.message.join('. ');
-    }
-    return data.message || 'Произошла ошибка';
-  }
-  return 'Произошла ошибка';
 }
 
 export function createSelectionStore(searchPort: ISearchPort, selectionPort: ISelectionPort) {

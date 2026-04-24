@@ -8,7 +8,10 @@ export class GetCompaniesUseCase {
     private readonly companyRepo: ICompanyRepository,
   ) {}
 
-  async execute(userId: string): Promise<CompanyEntity[]> {
+  async execute(userId: string, selectionId?: string): Promise<CompanyEntity[]> {
+    if (selectionId) {
+      return this.companyRepo.findBySelectionIdAndUserId(selectionId, userId);
+    }
     return this.companyRepo.findByUserId(userId);
   }
 }

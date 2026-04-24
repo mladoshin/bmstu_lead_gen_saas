@@ -1,5 +1,5 @@
 import type { Company } from '../entities/company';
 
 export interface ICompanyPort {
-  getCompanies(): Promise<Company[]>;
+  getCompanies(selectionId?: string): Promise<Company[]>;
 }
