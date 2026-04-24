@@ -41,5 +41,6 @@ import { CompaniesModule } from '../companies/companies.module';
     { provide: OPENAI_ENRICHMENT_SERVICE_TOKEN, useClass: OpenAIEnrichmentService },
     { provide: SEARCH_JOB_SERVICE_TOKEN, useClass: SearchJobService },
   ],
+  exports: [SELECTION_READER_TOKEN, SELECTION_WRITER_TOKEN],
 })
 export class SearchModule {}
