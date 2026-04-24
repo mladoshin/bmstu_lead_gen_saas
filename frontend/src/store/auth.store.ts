@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import type { User } from '@/core/entities/user';
 import type { IAuthPort } from '@/core/ports/auth.port';
 import type { ITokenStorage } from '@/core/ports/token-storage.port';
-import type { LoginRequest, RegisterRequest, ApiError } from '@/core/types/auth.types';
-import { AxiosError } from 'axios';
+import type { LoginRequest, RegisterRequest } from '@/core/types/auth.types';
+import { normalizeError } from '@/core/utils/normalize-error';
 
 interface AuthState {
   user: User | null;
@@ -17,17 +17,6 @@ interface AuthState {
   logout: () => void;
   checkAuth: () => Promise<void>;
   clearError: () => void;
-}
-
-function normalizeError(err: unknown): string {
-  if (err instanceof AxiosError && err.response?.data) {
-    const data = err.response.data as ApiError;
-    if (Array.isArray(data.message)) {
-      return data.message.join('. ');
-    }
-    return data.message || 'Произошла ошибка';
-  }
-  return 'Произошла ошибка';
 }
 
 export function createAuthStore(authPort: IAuthPort, tokenStorage: ITokenStorage) {

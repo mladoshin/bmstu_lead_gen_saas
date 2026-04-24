@@ -65,6 +65,16 @@ describe('GetCompaniesUseCase', () => {
     expect(result).toHaveLength(2);
   });
 
+  it('should return companies filtered by selectionId when provided', async () => {
+    repo.findBySelectionIdAndUserId.mockResolvedValue([companies[0]]);
+
+    const result = await useCase.execute('user-1', 'sel-1');
+
+    expect(repo.findBySelectionIdAndUserId).toHaveBeenCalledWith('sel-1', 'user-1');
+    expect(repo.findByUserId).not.toHaveBeenCalled();
+    expect(result).toEqual([companies[0]]);
+  });
+
   it('should return empty array when user has no companies', async () => {
     repo.findByUserId.mockResolvedValue([]);
 

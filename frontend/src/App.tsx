@@ -2,9 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GuestGuard } from '@features/auth/GuestGuard';
 import { AuthGuard } from '@features/auth/AuthGuard';
 import { AuthLayout } from '@layouts/AuthLayout';
+import { MainLayout } from '@layouts/MainLayout';
 import { LoginPage } from '@pages/LoginPage';
 import { RegisterPage } from '@pages/RegisterPage';
 import { HomePage } from '@pages/HomePage';
+import { SearchPage } from '@pages/SearchPage';
 
 export const App = () => {
   return (
@@ -17,7 +19,10 @@ export const App = () => {
           </Route>
         </Route>
         <Route element={<AuthGuard />}>
-          <Route path="/" element={<HomePage />} />
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/search" element={<SearchPage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

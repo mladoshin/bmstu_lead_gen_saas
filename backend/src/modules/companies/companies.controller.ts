@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -33,8 +34,8 @@ export class CompaniesController {
   ) {}
 
   @Get()
-  async findAll(@Request() req: { user: JwtPayload }) {
-    const companies = await this.getCompaniesUseCase.execute(req.user.sub);
+  async findAll(@Query('selectionId') selectionId: string | undefined, @Request() req: { user: JwtPayload }) {
+    const companies = await this.getCompaniesUseCase.execute(req.user.sub, selectionId);
     return this.companyMapper.toResponseList(companies);
   }
 
