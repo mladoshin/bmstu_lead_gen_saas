@@ -1,6 +1,7 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtPayload } from '../auth/types/jwt-payload.type';
 import { ExportCompaniesUseCase } from './use-cases/export-companies.use-case';
 import { ExportContactsUseCase } from './use-cases/export-contacts.use-case';
 import { ExportQueryDto } from './dto/export-query.dto';
@@ -14,16 +15,24 @@ export class ExportController {
   ) {}
 
   @Get('companies/csv')
-  async exportCompanies(@Query() query: ExportQueryDto, @Res() res: Response) {
-    const csv = await this.exportCompaniesUseCase.execute(query);
+  async exportCompanies(
+    @Query() query: ExportQueryDto,
+    @Req() req: Request & { user: JwtPayload },
+    @Res() res: Response,
+  ) {
+    const csv = await this.exportCompaniesUseCase.execute(query.selectionId, req.user.sub);
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="companies-${query.selectionId}.csv"`);
     res.send(csv);
   }
 
   @Get('contacts/csv')
-  async exportContacts(@Query() query: ExportQueryDto, @Res() res: Response) {
-    const csv = await this.exportContactsUseCase.execute(query);
+  async exportContacts(
+    @Query() query: ExportQueryDto,
+    @Req() req: Request & { user: JwtPayload },
+    @Res() res: Response,
+  ) {
+    const csv = await this.exportContactsUseCase.execute(query.selectionId, req.user.sub);
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="contacts-${query.selectionId}.csv"`);
     res.send(csv);

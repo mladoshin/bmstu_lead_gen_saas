@@ -18,6 +18,10 @@ export class PrismaContactRepository implements IContactRepository {
     return this.prisma.contact.findMany({ where: { companyId } });
   }
 
+  async findByCompanyIds(companyIds: string[]): Promise<ContactEntity[]> {
+    return this.prisma.contact.findMany({ where: { companyId: { in: companyIds } } });
+  }
+
   async findByCompanyIdAndFullName(companyId: string, firstName: string, lastName: string): Promise<ContactEntity | null> {
     return this.prisma.contact.findFirst({
       where: { companyId, firstName, lastName },
