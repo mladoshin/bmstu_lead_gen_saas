@@ -4,15 +4,18 @@ import { SpinnerIcon } from '@shared/ui';
 import { useAuthStore } from '@/store';
 
 export const AuthGuard = () => {
-  const { isAuthenticated, isLoading, checkAuth, token } = useAuthStore();
+  const { isAuthenticated, isAuthChecked, checkAuth, token } = useAuthStore();
 
   useEffect(() => {
-    if (token && !isAuthenticated) {
+    if (!isAuthChecked && token) {
       checkAuth();
     }
-  }, [token, isAuthenticated, checkAuth]);
+  }, [isAuthChecked, token, checkAuth]);
 
-  if (isLoading) {
+  if (!isAuthChecked) {
+    if (!token) {
+      return <Navigate to="/login" replace />;
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <SpinnerIcon className="w-8 h-8 animate-spin text-blue-600" />

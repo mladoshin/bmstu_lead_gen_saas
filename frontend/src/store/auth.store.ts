@@ -9,6 +9,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isAuthChecked: boolean;
   isLoading: boolean;
   error: string | null;
   login: (data: LoginRequest) => Promise<void>;
@@ -34,6 +35,7 @@ export function createAuthStore(authPort: IAuthPort, tokenStorage: ITokenStorage
     user: null,
     token: tokenStorage.getToken(),
     isAuthenticated: false,
+    isAuthChecked: false,
     isLoading: false,
     error: null,
 
@@ -46,6 +48,7 @@ export function createAuthStore(authPort: IAuthPort, tokenStorage: ITokenStorage
           user: response.user,
           token: response.accessToken,
           isAuthenticated: true,
+          isAuthChecked: true,
           isLoading: false,
         });
       } catch (err) {
@@ -62,6 +65,7 @@ export function createAuthStore(authPort: IAuthPort, tokenStorage: ITokenStorage
           user: response.user,
           token: response.accessToken,
           isAuthenticated: true,
+          isAuthChecked: true,
           isLoading: false,
         });
       } catch (err) {
@@ -71,22 +75,22 @@ export function createAuthStore(authPort: IAuthPort, tokenStorage: ITokenStorage
 
     logout: () => {
       tokenStorage.removeToken();
-      set({ user: null, token: null, isAuthenticated: false, error: null });
+      set({ user: null, token: null, isAuthenticated: false, isAuthChecked: true, error: null });
     },
 
     checkAuth: async () => {
       const token = tokenStorage.getToken();
       if (!token) {
-        set({ isAuthenticated: false, isLoading: false });
+        set({ isAuthenticated: false, isAuthChecked: true, isLoading: false });
         return;
       }
       set({ isLoading: true });
       try {
         const user = await authPort.getMe();
-        set({ user, token, isAuthenticated: true, isLoading: false });
+        set({ user, token, isAuthenticated: true, isAuthChecked: true, isLoading: false });
       } catch {
         tokenStorage.removeToken();
-        set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+        set({ user: null, token: null, isAuthenticated: false, isAuthChecked: true, isLoading: false });
       }
     },
 
