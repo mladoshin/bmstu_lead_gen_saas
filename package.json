@@ -1,13 +1,17 @@
 {
   "name": "bmstu-lead-gen-saas",
   "private": true,
+  "packageManager": "npm@11.11.0",
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "packages/shared-ui"
   ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:frontend": "turbo run dev --filter=frontend",
+    "dev:backend": "turbo run dev --filter=backend",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,json}\""

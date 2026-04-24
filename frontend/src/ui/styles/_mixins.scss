@@ -1,0 +1,67 @@
+// Breakpoints (Tailwind standard)
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+// Mobile-first mixins (min-width)
+
+@mixin sm {
+  @media (min-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (min-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
+// Desktop-first mixins (max-width)
+
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-sm - 1}) {
+    @content;
+  }
+}
+
+@mixin tablet-down {
+  @media (max-width: #{$breakpoint-md - 1}) {
+    @content;
+  }
+}
+
+@mixin desktop-down {
+  @media (max-width: #{$breakpoint-lg - 1}) {
+    @content;
+  }
+}
+
+// Container
+@mixin container($max-width: 1240px, $gutters: 20px) {
+  width: calc(100% - (#{$gutters} * 2));
+  max-width: $max-width;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $gutters;
+  padding-right: $gutters;
+
+  @include mobile-only {
+    padding-left: 12px;
+    padding-right: 12px;
+    width: calc(100% - 24px);
+  }
+}
