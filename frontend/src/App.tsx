@@ -10,6 +10,7 @@ import { SearchPage } from '@pages/SearchPage';
 import { ContactsPage } from '@pages/ContactsPage';
 import { CompaniesPage } from '@pages/CompaniesPage';
 import { AllContactsPage } from '@pages/AllContactsPage';
+import { SelectionsPage } from '@pages/SelectionsPage';
 
 export const App = () => {
   return (
@@ -27,6 +28,7 @@ export const App = () => {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/companies" element={<CompaniesPage />} />
             <Route path="/contacts" element={<AllContactsPage />} />
+            <Route path="/selections" element={<SelectionsPage />} />
             <Route path="/contacts/:selectionId" element={<ContactsPage />} />
           </Route>
         </Route>

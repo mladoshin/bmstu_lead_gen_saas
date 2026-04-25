@@ -9,4 +9,13 @@ export class SelectionService implements ISelectionPort {
     const response = await this.http.get<Selection>(`/selections/${id}`);
     return response.data;
   }
+
+  async getSelections(): Promise<Selection[]> {
+    const response = await this.http.get<Selection[]>('/selections');
+    return response.data;
+  }
+
+  async deleteSelection(id: string): Promise<void> {
+    await this.http.delete(`/selections/${id}`);
+  }
 }
