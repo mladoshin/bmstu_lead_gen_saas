@@ -42,11 +42,18 @@ export class PrismaContactRepository implements IContactRepository {
   }
 
   async create(data: CreateContactData): Promise<ContactEntity> {
-    return this.prisma.contact.create({ data });
+    return this.prisma.contact.create({
+      data,
+      include: { emailVerification: true },
+    });
   }
 
   async update(id: string, data: Partial<CreateContactData>): Promise<ContactEntity> {
-    return this.prisma.contact.update({ where: { id }, data });
+    return this.prisma.contact.update({
+      where: { id },
+      data,
+      include: { emailVerification: true },
+    });
   }
 
   async delete(id: string): Promise<void> {
