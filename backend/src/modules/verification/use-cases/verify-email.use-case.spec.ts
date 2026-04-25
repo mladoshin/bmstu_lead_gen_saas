@@ -62,6 +62,7 @@ describe('VerifyEmailUseCase', () => {
       findByCompanyId: jest.fn(),
       findByCompanyIds: jest.fn(),
       findByCompanyIdAndFullName: jest.fn(),
+      findBySelectionId: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
