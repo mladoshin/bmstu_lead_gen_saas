@@ -11,6 +11,7 @@ export const MainLayout = () => {
     { to: '/search', label: 'Поиск' },
     { to: '/companies', label: 'Компании' },
     { to: '/contacts', label: 'Контакты' },
+    { to: '/selections', label: 'Подборки' },
   ];
 
   return (

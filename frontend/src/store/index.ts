@@ -14,6 +14,7 @@ import { createCompanyStore } from './slices/company.store';
 import { createContactStore } from './slices/contact.store';
 import { createEmailGenerationStore } from './slices/email-generation.store';
 import { createVerificationStore } from './slices/verification.store';
+import { createSelectionsListStore } from './slices/selections-list.store';
 
 const tokenStorage = new LocalTokenStorage();
 const axiosInstance = createAxiosInstance(tokenStorage);
@@ -32,5 +33,6 @@ export const useCompanyStore = createCompanyStore(companyService);
 export const useContactStore = createContactStore(contactService);
 export const useEmailGenerationStore = createEmailGenerationStore(emailGenerationService);
 export const useVerificationStore = createVerificationStore(verificationService);
+export const useSelectionsListStore = createSelectionsListStore(selectionService);
 
 export { exportService };
