@@ -22,6 +22,7 @@ import { ContactMapper } from './mappers/contact.mapper';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { DiscoverContactsDto } from './dto/discover-contacts.dto';
+import { ContactsQueryDto } from './dto/contacts-query.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('contacts')
@@ -38,9 +39,9 @@ export class ContactsController {
   ) {}
 
   @Get()
-  async findAll(@Query('selectionId') selectionId: string | undefined, @Request() req: any) {
-    const contacts = selectionId
-      ? await this.getContactsBySelectionUseCase.execute(selectionId, req.user.sub)
+  async findAll(@Query() query: ContactsQueryDto, @Request() req: any) {
+    const contacts = query.selectionId
+      ? await this.getContactsBySelectionUseCase.execute(query.selectionId, req.user.sub)
       : await this.getContactsUseCase.execute(req.user.sub);
     return this.contactMapper.toResponseList(contacts);
   }

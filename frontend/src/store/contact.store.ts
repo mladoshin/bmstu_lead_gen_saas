@@ -23,7 +23,7 @@ export function createContactStore(contactPort: IContactPort) {
     error: null,
 
     loadBySelection: async (selectionId) => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true, error: null, contacts: [] });
       try {
         const contacts = await contactPort.getContacts(selectionId);
         set({ contacts, isLoading: false });
@@ -36,10 +36,14 @@ export function createContactStore(contactPort: IContactPort) {
       set({ isDiscovering: true, error: null });
       try {
         const contacts = await contactPort.discoverContacts(data);
-        set((state) => ({
-          contacts: [...state.contacts, ...contacts],
-          isDiscovering: false,
-        }));
+        set((state) => {
+          const existingIds = new Set(state.contacts.map((c) => c.id));
+          const newContacts = contacts.filter((c) => !existingIds.has(c.id));
+          return {
+            contacts: [...state.contacts, ...newContacts],
+            isDiscovering: false,
+          };
+        });
       } catch (err) {
         set({ isDiscovering: false, error: normalizeError(err) });
       }
