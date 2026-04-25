@@ -1,5 +1,6 @@
 import { SpinnerIcon } from '@shared/ui';
 import { useContactStore } from '@/store';
+import { VerificationBadge } from '@features/email/VerificationBadge';
 
 export const ContactTable = () => {
   const { contacts, isLoading } = useContactStore();
@@ -27,6 +28,7 @@ export const ContactTable = () => {
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Должность</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seniority</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Верификация</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">LinkedIn</th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Confidence</th>
           </tr>
@@ -40,6 +42,9 @@ export const ContactTable = () => {
               <td className="px-4 py-3 text-sm text-gray-600">{contact.position}</td>
               <td className="px-4 py-3 text-sm text-gray-600">{contact.seniority || '—'}</td>
               <td className="px-4 py-3 text-sm text-gray-600">{contact.email || '—'}</td>
+              <td className="px-4 py-3 text-sm">
+                <VerificationBadge verification={contact.emailVerification} />
+              </td>
               <td className="px-4 py-3 text-sm text-blue-600">
                 {contact.linkedin ? (
                   <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="hover:underline">

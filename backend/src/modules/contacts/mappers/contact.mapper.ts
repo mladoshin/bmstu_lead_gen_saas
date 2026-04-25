@@ -20,6 +20,16 @@ export class ContactMapper {
       confidenceScore: entity.confidenceScore ?? undefined,
       source: entity.source,
       createdAt: entity.createdAt,
+      emailVerification: entity.emailVerification
+        ? {
+            id: entity.emailVerification.id,
+            isValid: entity.emailVerification.isValid,
+            smtpCheck: entity.emailVerification.smtpCheck ?? undefined,
+            catchAll: entity.emailVerification.catchAll ?? undefined,
+            confidenceScore: entity.emailVerification.confidenceScore ?? undefined,
+            verifiedAt: entity.emailVerification.verifiedAt,
+          }
+        : undefined,
     };
   }
 

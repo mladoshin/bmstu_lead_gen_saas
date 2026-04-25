@@ -13,4 +13,12 @@ export interface Contact {
   confidenceScore: number | null;
   source: string;
   createdAt: string;
+  emailVerification?: {
+    id: string;
+    isValid: boolean;
+    smtpCheck?: boolean;
+    catchAll?: boolean;
+    confidenceScore?: number;
+    verifiedAt: string;
+  } | null;
 }

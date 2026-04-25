@@ -13,4 +13,12 @@ export class ContactResponseDto {
   confidenceScore?: number;
   source: string;
   createdAt: Date;
+  emailVerification?: {
+    id: string;
+    isValid: boolean;
+    smtpCheck?: boolean;
+    catchAll?: boolean;
+    confidenceScore?: number;
+    verifiedAt: Date;
+  };
 }
