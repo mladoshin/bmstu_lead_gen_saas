@@ -38,6 +38,7 @@ export interface IContactRepository {
   findByCompanyIdAndFullName(companyId: string, firstName: string, lastName: string): Promise<ContactEntity | null>;
   create(data: CreateContactData): Promise<ContactEntity>;
   update(id: string, data: Partial<CreateContactData>): Promise<ContactEntity>;
+  findBySelectionId(selectionId: string, userId: string): Promise<ContactEntity[]>;
   delete(id: string): Promise<void>;
 }
 

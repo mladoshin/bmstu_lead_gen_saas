@@ -6,11 +6,13 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetContactsUseCase } from './use-cases/get-contacts.use-case';
+import { GetContactsBySelectionUseCase } from './use-cases/get-contacts-by-selection.use-case';
 import { GetContactUseCase } from './use-cases/get-contact.use-case';
 import { CreateContactUseCase } from './use-cases/create-contact.use-case';
 import { UpdateContactUseCase } from './use-cases/update-contact.use-case';
@@ -20,12 +22,14 @@ import { ContactMapper } from './mappers/contact.mapper';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { DiscoverContactsDto } from './dto/discover-contacts.dto';
+import { ContactsQueryDto } from './dto/contacts-query.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('contacts')
 export class ContactsController {
   constructor(
     private readonly getContactsUseCase: GetContactsUseCase,
+    private readonly getContactsBySelectionUseCase: GetContactsBySelectionUseCase,
     private readonly getContactUseCase: GetContactUseCase,
     private readonly createContactUseCase: CreateContactUseCase,
     private readonly updateContactUseCase: UpdateContactUseCase,
@@ -35,8 +39,10 @@ export class ContactsController {
   ) {}
 
   @Get()
-  async findAll(@Request() req: any) {
-    const contacts = await this.getContactsUseCase.execute(req.user.sub);
+  async findAll(@Query() query: ContactsQueryDto, @Request() req: any) {
+    const contacts = query.selectionId
+      ? await this.getContactsBySelectionUseCase.execute(query.selectionId, req.user.sub)
+      : await this.getContactsUseCase.execute(req.user.sub);
     return this.contactMapper.toResponseList(contacts);
   }
 

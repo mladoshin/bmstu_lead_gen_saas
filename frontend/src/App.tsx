@@ -7,6 +7,7 @@ import { LoginPage } from '@pages/LoginPage';
 import { RegisterPage } from '@pages/RegisterPage';
 import { HomePage } from '@pages/HomePage';
 import { SearchPage } from '@pages/SearchPage';
+import { ContactsPage } from '@pages/ContactsPage';
 
 export const App = () => {
   return (
@@ -22,6 +23,7 @@ export const App = () => {
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/contacts/:selectionId" element={<ContactsPage />} />
           </Route>
         </Route>
       </Routes>
