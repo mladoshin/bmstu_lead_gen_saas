@@ -22,6 +22,12 @@ export class PrismaContactRepository implements IContactRepository {
     return this.prisma.contact.findMany({ where: { companyId: { in: companyIds } } });
   }
 
+  async findBySelectionId(selectionId: string, userId: string): Promise<ContactEntity[]> {
+    return this.prisma.contact.findMany({
+      where: { userId, company: { selectionId } },
+    });
+  }
+
   async findByCompanyIdAndFullName(companyId: string, firstName: string, lastName: string): Promise<ContactEntity | null> {
     return this.prisma.contact.findFirst({
       where: { companyId, firstName, lastName },

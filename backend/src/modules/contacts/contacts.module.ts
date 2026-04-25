@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ContactsController } from './contacts.controller';
 import { GetContactsUseCase } from './use-cases/get-contacts.use-case';
+import { GetContactsBySelectionUseCase } from './use-cases/get-contacts-by-selection.use-case';
 import { GetContactUseCase } from './use-cases/get-contact.use-case';
 import { CreateContactUseCase } from './use-cases/create-contact.use-case';
 import { UpdateContactUseCase } from './use-cases/update-contact.use-case';
@@ -18,6 +19,7 @@ import { CompaniesModule } from '../companies/companies.module';
   controllers: [ContactsController],
   providers: [
     GetContactsUseCase,
+    GetContactsBySelectionUseCase,
     GetContactUseCase,
     CreateContactUseCase,
     UpdateContactUseCase,
