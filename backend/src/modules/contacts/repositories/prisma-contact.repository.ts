@@ -7,11 +7,17 @@ export class PrismaContactRepository implements IContactRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<ContactEntity | null> {
-    return this.prisma.contact.findUnique({ where: { id } });
+    return this.prisma.contact.findUnique({
+      where: { id },
+      include: { emailVerification: true },
+    });
   }
 
   async findByUserId(userId: string): Promise<ContactEntity[]> {
-    return this.prisma.contact.findMany({ where: { userId } });
+    return this.prisma.contact.findMany({
+      where: { userId },
+      include: { emailVerification: true },
+    });
   }
 
   async findByCompanyId(companyId: string): Promise<ContactEntity[]> {
@@ -25,6 +31,7 @@ export class PrismaContactRepository implements IContactRepository {
   async findBySelectionId(selectionId: string, userId: string): Promise<ContactEntity[]> {
     return this.prisma.contact.findMany({
       where: { userId, company: { selectionId } },
+      include: { emailVerification: true },
     });
   }
 
@@ -35,11 +42,18 @@ export class PrismaContactRepository implements IContactRepository {
   }
 
   async create(data: CreateContactData): Promise<ContactEntity> {
-    return this.prisma.contact.create({ data });
+    return this.prisma.contact.create({
+      data,
+      include: { emailVerification: true },
+    });
   }
 
   async update(id: string, data: Partial<CreateContactData>): Promise<ContactEntity> {
-    return this.prisma.contact.update({ where: { id }, data });
+    return this.prisma.contact.update({
+      where: { id },
+      data,
+      include: { emailVerification: true },
+    });
   }
 
   async delete(id: string): Promise<void> {

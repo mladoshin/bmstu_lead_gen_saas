@@ -1,3 +1,12 @@
+export class EmailVerificationResponseDto {
+  id: string;
+  isValid: boolean;
+  smtpCheck?: boolean;
+  catchAll?: boolean;
+  confidenceScore?: number;
+  verifiedAt: Date;
+}
+
 export class ContactResponseDto {
   id: string;
   companyId: string;
@@ -13,4 +22,5 @@ export class ContactResponseDto {
   confidenceScore?: number;
   source: string;
   createdAt: Date;
+  emailVerification?: EmailVerificationResponseDto;
 }

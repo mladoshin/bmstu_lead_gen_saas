@@ -1,3 +1,12 @@
+export interface EmailVerificationData {
+  id: string;
+  isValid: boolean;
+  smtpCheck?: boolean | null;
+  catchAll?: boolean | null;
+  confidenceScore?: number | null;
+  verifiedAt: Date;
+}
+
 export interface ContactEntity {
   id: string;
   companyId: string;
@@ -13,6 +22,7 @@ export interface ContactEntity {
   confidenceScore?: number | null;
   source: string;
   createdAt: Date;
+  emailVerification?: EmailVerificationData | null;
 }
 
 export interface CreateContactData {
