@@ -5,10 +5,10 @@ import { SearchService } from '@/api/services/search.service';
 import { SelectionService } from '@/api/services/selection.service';
 import { CompanyService } from '@/api/services/company.service';
 import { ContactService } from '@/api/services/contact.service';
-import { createAuthStore } from './auth.store';
-import { createSelectionStore } from './selection.store';
-import { createCompanyStore } from './company.store';
-import { createContactStore } from './contact.store';
+import { createAuthStore } from './slices/auth.store';
+import { createSelectionStore } from './slices/selection.store';
+import { createCompanyStore } from './slices/company.store';
+import { createContactStore } from './slices/contact.store';
 
 const tokenStorage = new LocalTokenStorage();
 const axiosInstance = createAxiosInstance(tokenStorage);

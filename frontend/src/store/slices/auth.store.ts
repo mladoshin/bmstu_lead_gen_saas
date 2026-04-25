@@ -1,26 +1,11 @@
 import { create } from 'zustand';
-import type { User } from '@/core/entities/user';
+import type { IAuthStore } from '@/core/ports/auth-store.port';
 import type { IAuthPort } from '@/core/ports/auth.port';
 import type { ITokenStorage } from '@/core/ports/token-storage.port';
-import type { LoginRequest, RegisterRequest } from '@/core/types/auth.types';
 import { normalizeError } from '@/core/utils/normalize-error';
 
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isAuthChecked: boolean;
-  isLoading: boolean;
-  error: string | null;
-  login: (data: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
-  checkAuth: () => Promise<void>;
-  clearError: () => void;
-}
-
 export function createAuthStore(authPort: IAuthPort, tokenStorage: ITokenStorage) {
-  return create<AuthState>((set) => ({
+  return create<IAuthStore>((set) => ({
     user: null,
     token: tokenStorage.getToken(),
     isAuthenticated: false,

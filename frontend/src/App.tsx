@@ -8,6 +8,8 @@ import { RegisterPage } from '@pages/RegisterPage';
 import { HomePage } from '@pages/HomePage';
 import { SearchPage } from '@pages/SearchPage';
 import { ContactsPage } from '@pages/ContactsPage';
+import { CompaniesPage } from '@pages/CompaniesPage';
+import { AllContactsPage } from '@pages/AllContactsPage';
 
 export const App = () => {
   return (
@@ -23,6 +25,8 @@ export const App = () => {
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/contacts" element={<AllContactsPage />} />
             <Route path="/contacts/:selectionId" element={<ContactsPage />} />
           </Route>
         </Route>

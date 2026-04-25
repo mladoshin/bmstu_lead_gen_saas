@@ -1,22 +1,11 @@
 import { create } from 'zustand';
-import type { Selection } from '@/core/entities/selection';
+import type { ISelectionStore } from '@/core/ports/selection-store.port';
 import type { ISearchPort } from '@/core/ports/search.port';
 import type { ISelectionPort } from '@/core/ports/selection.port';
-import type { SearchCompaniesRequest } from '@/core/types/search.types';
 import { normalizeError } from '@/core/utils/normalize-error';
 
-interface SelectionState {
-  currentSelection: Selection | null;
-  isSearching: boolean;
-  error: string | null;
-  search: (data: SearchCompaniesRequest) => Promise<void>;
-  pollSelection: () => Promise<void>;
-  reset: () => void;
-  clearError: () => void;
-}
-
 export function createSelectionStore(searchPort: ISearchPort, selectionPort: ISelectionPort) {
-  return create<SelectionState>((set, get) => ({
+  return create<ISelectionStore>((set, get) => ({
     currentSelection: null,
     isSearching: false,
     error: null,

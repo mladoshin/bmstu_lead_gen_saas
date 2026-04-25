@@ -19,6 +19,24 @@ export const HomePage = () => {
             Найти B2B-компании по отрасли и городам
           </p>
         </Link>
+        <Link
+          to="/companies"
+          className="block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold text-gray-900">Компании</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Просмотр всех найденных компаний
+          </p>
+        </Link>
+        <Link
+          to="/contacts"
+          className="block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold text-gray-900">Контакты</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Просмотр всех найденных контактов
+          </p>
+        </Link>
       </div>
     </div>
   );
