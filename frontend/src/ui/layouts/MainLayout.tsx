@@ -9,6 +9,8 @@ export const MainLayout = () => {
   const navLinks = [
     { to: '/', label: 'Главная' },
     { to: '/search', label: 'Поиск' },
+    { to: '/companies', label: 'Компании' },
+    { to: '/contacts', label: 'Контакты' },
   ];
 
   return (
