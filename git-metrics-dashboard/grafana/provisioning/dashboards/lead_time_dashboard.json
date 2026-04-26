@@ -1,0 +1,242 @@
+{
+  "title": "Lead Time Dashboard - B2B Contact Finder",
+  "description": "Анализ времени нахождения задач в статусах",
+  "time": {
+    "from": "now-6M",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "panels": [
+{
+  "id": 1,
+  "title": "Lead Time by Status",
+  "type": "barchart",
+  "gridPos": {"x": 0, "y": 0, "w": 24, "h": 16},
+  "targets": [
+    {
+      "expr": "lead_time_status_days{status=\"backlog\"}",
+      "format": "table",
+      "instant": true,
+      "legendFormat": "backlog"
+    },
+    {
+      "expr": "lead_time_status_days{status=\"todo\"}",
+      "format": "table",
+      "instant": true,
+      "legendFormat": "todo"
+    },
+    {
+      "expr": "lead_time_status_days{status=\"in_progress\"}",
+      "format": "table",
+      "instant": true,
+      "legendFormat": "in_progress"
+    },
+    {
+      "expr": "lead_time_status_days{status=\"in_review\"}",
+      "format": "table",
+      "instant": true,
+      "legendFormat": "in_review"
+    },
+    {
+      "expr": "lead_time_status_days{status=\"done\"}",
+      "format": "table",
+      "instant": true,
+      "legendFormat": "done"
+    }
+  ],
+  "transformations": [
+    {
+      "id": "joinByField",
+      "options": {
+        "byField": "week",
+        "mode": "outer"
+      }
+    },
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {
+          "Time 1": true,
+          "Time 2": true,
+          "Time 3": true,
+          "Time 4": true,
+          "Time 5": true,
+          "__name__ 1": true,
+          "__name__ 2": true,
+          "__name__ 3": true,
+          "__name__ 4": true,
+          "__name__ 5": true,
+          "job 1": true,
+          "job 2": true,
+          "job 3": true,
+          "job 4": true,
+          "job 5": true,
+          "instance 1": true,
+          "instance 2": true,
+          "instance 3": true,
+          "instance 4": true,
+          "instance 5": true,
+          "status 1": true,
+          "status 2": true,
+          "status 3": true,
+          "status 4": true,
+          "status 5": true,
+          "exported_job 1": true,
+          "exported_job 2": true,
+          "exported_job 3": true,
+          "exported_job 4": true,
+          "exported_job 5": true
+        },
+        "indexByName": {
+          "week": 0,
+          "Value #A": 1,
+          "Value #B": 2,
+          "Value #C": 3,
+          "Value #D": 4,
+          "Value #E": 5
+        },
+        "renameByName": {
+          "week": "Неделя",
+          "Value #A": "Бэклог",
+          "Value #B": "Готово к работе",
+          "Value #C": "В работе",
+          "Value #D": "На проверке",
+          "Value #E": "Готово"
+        }
+      }
+    }
+  ],
+  "options": {
+    "orientation": "horizontal",
+    "stacking": "normal",
+    "groupWidth": 0.7,
+    "showValue": "auto"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "unit": "d",
+      "decimals": 1
+    }
+  }
+},
+    {
+      "id": 2,
+      "title": "Lead Time Trend (по неделям)",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "lead_time_status_days{status=\"todo\"}",
+          "legendFormat": "Готово к работе"
+        },
+        {
+          "expr": "lead_time_status_days{status=\"in_progress\"}",
+          "legendFormat": "В работе"
+        },
+        {
+          "expr": "lead_time_status_days{status=\"in_review\"}",
+          "legendFormat": "На проверке"
+        },
+        {
+          "expr": "lead_time_status_days{status=\"done\"}",
+          "legendFormat": "Готово"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "last"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d",
+          "decimals": 1
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Средний Lead Time по статусам (всего)",
+      "type": "barchart",
+      "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "avg(lead_time_status_days{status=\"backlog\"})",
+          "legendFormat": "Бэклог"
+        },
+        {
+          "expr": "avg(lead_time_status_days{status=\"todo\"})",
+          "legendFormat": "Готово к работе"
+        },
+        {
+          "expr": "avg(lead_time_status_days{status=\"in_progress\"})",
+          "legendFormat": "В работе"
+        },
+        {
+          "expr": "avg(lead_time_status_days{status=\"in_review\"})",
+          "legendFormat": "На проверке"
+        },
+        {
+          "expr": "avg(lead_time_status_days{status=\"done\"})",
+          "legendFormat": "Готово"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "stacking": "normal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d",
+          "decimals": 1
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Общий Lead Time по неделям",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 24, "w": 12, "h": 6},
+      "targets": [
+        {
+          "expr": "total_lead_time_days",
+          "legendFormat": "Общее время (дни)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d",
+          "decimals": 1
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Количество завершенных элементов",
+      "type": "stat",
+      "gridPos": {"x": 12, "y": 24, "w": 6, "h": 6},
+      "targets": [
+        {
+          "expr": "completed_items_count"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        }
+      }
+    }
+  ],
+  "refresh": "1h"
+}
