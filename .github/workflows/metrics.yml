@@ -1,0 +1,25 @@
+name: Collect Metrics
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  collect-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r git-metrics-dashboard/collector/requirements.txt
+
+      - name: Collect and push metrics
+        run: python git-metrics-dashboard/collector/collect_metrics.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUSHGATEWAY_URL: ${{ vars.PUSHGATEWAY_URL }}
