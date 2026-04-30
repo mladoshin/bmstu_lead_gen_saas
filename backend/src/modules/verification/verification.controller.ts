@@ -26,10 +26,7 @@ export class VerificationController {
   ) {}
 
   @Post('verify')
-  async verify(
-    @Body() dto: VerifyEmailDto,
-    @Request() req: { user: JwtPayload },
-  ) {
+  async verify(@Body() dto: VerifyEmailDto, @Request() req: { user: JwtPayload }) {
     try {
       const result = await this.verifyEmailUseCase.execute(dto, req.user.sub);
       return this.verificationMapper.toResponse(result);

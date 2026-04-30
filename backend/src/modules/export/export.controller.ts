@@ -22,7 +22,10 @@ export class ExportController {
   ) {
     const csv = await this.exportCompaniesUseCase.execute(query.selectionId, req.user.sub);
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="companies-${query.selectionId}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="companies-${query.selectionId}.csv"`,
+    );
     res.send(csv);
   }
 
@@ -34,7 +37,10 @@ export class ExportController {
   ) {
     const csv = await this.exportContactsUseCase.execute(query.selectionId, req.user.sub);
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="contacts-${query.selectionId}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="contacts-${query.selectionId}.csv"`,
+    );
     res.send(csv);
   }
 }

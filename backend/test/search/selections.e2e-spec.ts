@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 
 const BASE_SEARCH = '/api/search';
 const BASE_SELECTIONS = '/api/selections';
@@ -16,9 +17,7 @@ describe('Selections (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 
@@ -32,7 +31,10 @@ describe('Selections (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
@@ -172,8 +174,7 @@ describe('Selections (e2e)', () => {
 
     it('401 без токена', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const res = await request(app.getHttpServer())
-        .get(`${BASE_SELECTIONS}/${nonExistentId}`);
+      const res = await request(app.getHttpServer()).get(`${BASE_SELECTIONS}/${nonExistentId}`);
 
       expect(res.status).toBe(401);
     });
@@ -220,8 +221,7 @@ describe('Selections (e2e)', () => {
 
     it('401 без токена', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const res = await request(app.getHttpServer())
-        .delete(`${BASE_SELECTIONS}/${nonExistentId}`);
+      const res = await request(app.getHttpServer()).delete(`${BASE_SELECTIONS}/${nonExistentId}`);
 
       expect(res.status).toBe(401);
     });

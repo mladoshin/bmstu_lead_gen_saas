@@ -9,7 +9,7 @@ export class SearchUtils {
 
   static deduplicate<T extends { domain?: string; name: string; city: string }>(items: T[]): T[] {
     const seen = new Set<string>();
-    return items.filter(c => {
+    return items.filter((c) => {
       const key = c.domain ?? `${c.name}|${c.city}`.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);

@@ -24,7 +24,10 @@ export class PrismaSelectionRepository implements ISelectionRepository {
   }
 
   async updateStatus(id: string, status: SelectionStatus): Promise<SelectionEntity> {
-    return this.prisma.selection.update({ where: { id }, data: { status } }) as Promise<SelectionEntity>;
+    return this.prisma.selection.update({
+      where: { id },
+      data: { status },
+    }) as Promise<SelectionEntity>;
   }
 
   async delete(id: string): Promise<void> {

@@ -1,11 +1,35 @@
 import { Inject, Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { ISelectionReader, SELECTION_READER_TOKEN } from '../../search/repositories/selection.repository';
-import { ISelectionWriter, SELECTION_WRITER_TOKEN } from '../../search/repositories/selection.repository';
-import { ICompanyRepository, COMPANY_REPOSITORY_TOKEN } from '../../companies/repositories/company.repository';
-import { IContactRepository, CONTACT_REPOSITORY_TOKEN } from '../../contacts/repositories/contact.repository';
+import {
+  ISelectionReader,
+  SELECTION_READER_TOKEN,
+} from '../../search/repositories/selection.repository';
+import {
+  ISelectionWriter,
+  SELECTION_WRITER_TOKEN,
+} from '../../search/repositories/selection.repository';
+import {
+  ICompanyRepository,
+  COMPANY_REPOSITORY_TOKEN,
+} from '../../companies/repositories/company.repository';
+import {
+  IContactRepository,
+  CONTACT_REPOSITORY_TOKEN,
+} from '../../contacts/repositories/contact.repository';
 import { ExportMapper } from '../mappers/export.mapper';
 
-const HEADERS = ['id', 'first_name', 'last_name', 'position', 'seniority', 'email', 'phone', 'linkedin', 'telegram', 'confidence_score', 'source'];
+const HEADERS = [
+  'id',
+  'first_name',
+  'last_name',
+  'position',
+  'seniority',
+  'email',
+  'phone',
+  'linkedin',
+  'telegram',
+  'confidence_score',
+  'source',
+];
 
 @Injectable()
 export class ExportContactsUseCase {

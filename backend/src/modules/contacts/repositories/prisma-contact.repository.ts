@@ -35,7 +35,11 @@ export class PrismaContactRepository implements IContactRepository {
     });
   }
 
-  async findByCompanyIdAndFullName(companyId: string, firstName: string, lastName: string): Promise<ContactEntity | null> {
+  async findByCompanyIdAndFullName(
+    companyId: string,
+    firstName: string,
+    lastName: string,
+  ): Promise<ContactEntity | null> {
     return this.prisma.contact.findFirst({
       where: { companyId, firstName, lastName },
     });

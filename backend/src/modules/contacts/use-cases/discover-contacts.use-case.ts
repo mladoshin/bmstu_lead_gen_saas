@@ -1,7 +1,17 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { IContactRepository, CONTACT_REPOSITORY_TOKEN, ContactEntity } from '../repositories/contact.repository';
-import { ICompanyRepository, COMPANY_REPOSITORY_TOKEN } from '../../companies/repositories/company.repository';
-import { IContactDiscoveryService, CONTACT_DISCOVERY_SERVICE_TOKEN } from '../services/contact-discovery.service';
+import {
+  IContactRepository,
+  CONTACT_REPOSITORY_TOKEN,
+  ContactEntity,
+} from '../repositories/contact.repository';
+import {
+  ICompanyRepository,
+  COMPANY_REPOSITORY_TOKEN,
+} from '../../companies/repositories/company.repository';
+import {
+  IContactDiscoveryService,
+  CONTACT_DISCOVERY_SERVICE_TOKEN,
+} from '../services/contact-discovery.service';
 import { DiscoverContactsDto } from '../dto/discover-contacts.dto';
 
 @Injectable()
@@ -47,9 +57,7 @@ export class DiscoverContactsUseCase {
         }
 
         const existingContacts = await this.contactRepo.findByCompanyId(company.id);
-        const existingKeys = new Set(
-          existingContacts.map((c) => `${c.firstName}\0${c.lastName}`),
-        );
+        const existingKeys = new Set(existingContacts.map((c) => `${c.firstName}\0${c.lastName}`));
 
         for (const contact of discovered) {
           const key = `${contact.firstName}\0${contact.lastName}`;

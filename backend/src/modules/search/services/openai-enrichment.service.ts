@@ -69,7 +69,9 @@ export class OpenAIEnrichmentService implements IOpenAIEnrichmentService {
       const merged = companies.map((original) => {
         const enriched = enrichedByName.get(original.name);
         if (!isValidEnrichedCompany(enriched)) {
-          this.logger.warn(`No valid enriched entry for company "${original.name}", using original`);
+          this.logger.warn(
+            `No valid enriched entry for company "${original.name}", using original`,
+          );
           return { ...original, industry };
         }
         return { ...original, ...enriched };
@@ -80,7 +82,7 @@ export class OpenAIEnrichmentService implements IOpenAIEnrichmentService {
       this.logger.error(
         `OpenAI enrichment failed for industry "${industry}": ${(err as Error).message}`,
       );
-      return companies.map(c => ({ ...c, industry }));
+      return companies.map((c) => ({ ...c, industry }));
     }
   }
 }

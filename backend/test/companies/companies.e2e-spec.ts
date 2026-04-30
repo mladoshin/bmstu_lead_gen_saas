@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 
 const BASE_COMPANIES = '/api/companies';
 const BASE_SEARCH = '/api/search';
@@ -16,9 +17,7 @@ describe('Companies (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 
@@ -40,7 +39,10 @@ describe('Companies (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
@@ -135,15 +137,25 @@ describe('Companies (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post(BASE_COMPANIES)
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Test Corp', industry: 'IT', city: 'Москва', source: 'manual', selectionId: 'not-a-uuid' });
+        .send({
+          name: 'Test Corp',
+          industry: 'IT',
+          city: 'Москва',
+          source: 'manual',
+          selectionId: 'not-a-uuid',
+        });
 
       expect(res.status).toBe(400);
     });
 
     it('401 без токена', async () => {
-      const res = await request(app.getHttpServer())
-        .post(BASE_COMPANIES)
-        .send({ name: 'Test Corp', industry: 'IT', city: 'Москва', source: 'manual', selectionId: '00000000-0000-0000-0000-000000000000' });
+      const res = await request(app.getHttpServer()).post(BASE_COMPANIES).send({
+        name: 'Test Corp',
+        industry: 'IT',
+        city: 'Москва',
+        source: 'manual',
+        selectionId: '00000000-0000-0000-0000-000000000000',
+      });
 
       expect(res.status).toBe(401);
     });
@@ -198,8 +210,7 @@ describe('Companies (e2e)', () => {
 
     it('401 без токена', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const res = await request(app.getHttpServer())
-        .get(`${BASE_COMPANIES}/${nonExistentId}`);
+      const res = await request(app.getHttpServer()).get(`${BASE_COMPANIES}/${nonExistentId}`);
 
       expect(res.status).toBe(401);
     });
@@ -303,8 +314,7 @@ describe('Companies (e2e)', () => {
 
     it('401 без токена', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const res = await request(app.getHttpServer())
-        .delete(`${BASE_COMPANIES}/${nonExistentId}`);
+      const res = await request(app.getHttpServer()).delete(`${BASE_COMPANIES}/${nonExistentId}`);
 
       expect(res.status).toBe(401);
     });

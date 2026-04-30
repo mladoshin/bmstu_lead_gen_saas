@@ -61,9 +61,9 @@ describe('UpdateCompanyUseCase', () => {
   it('should throw NotFoundException when company not found', async () => {
     repo.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute('comp-999', { name: 'X' }, 'user-1'),
-    ).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('comp-999', { name: 'X' }, 'user-1')).rejects.toThrow(
+      NotFoundException,
+    );
 
     expect(repo.update).not.toHaveBeenCalled();
   });
@@ -71,9 +71,9 @@ describe('UpdateCompanyUseCase', () => {
   it('should throw ForbiddenException when userId does not match', async () => {
     repo.findById.mockResolvedValue(existing);
 
-    await expect(
-      useCase.execute('comp-1', { name: 'X' }, 'other-user'),
-    ).rejects.toThrow(ForbiddenException);
+    await expect(useCase.execute('comp-1', { name: 'X' }, 'other-user')).rejects.toThrow(
+      ForbiddenException,
+    );
 
     expect(repo.update).not.toHaveBeenCalled();
   });

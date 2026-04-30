@@ -39,10 +39,7 @@ export class BulkVerifyUseCase {
     let processed = 0;
     let verified = 0;
 
-    const companies = await this.companyRepo.findBySelectionIdAndUserId(
-      dto.selectionId,
-      userId,
-    );
+    const companies = await this.companyRepo.findBySelectionIdAndUserId(dto.selectionId, userId);
 
     for (const company of companies) {
       const contacts = await this.contactRepo.findByCompanyId(company.id);
@@ -55,9 +52,7 @@ export class BulkVerifyUseCase {
         processed++;
 
         try {
-          const result = await this.emailVerificationService.verifyEmail(
-            contact.email,
-          );
+          const result = await this.emailVerificationService.verifyEmail(contact.email);
 
           await this.verificationRepo.upsert({
             contactId: contact.id,

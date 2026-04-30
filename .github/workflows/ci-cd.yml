@@ -80,6 +80,10 @@ jobs:
   deploy:
     name: Deploy to VM
     runs-on: self-hosted
+<<<<<<< HEAD
+=======
+    needs: build-and-test
+>>>>>>> 71035f115b0bb7ad96cb399c4288f146889c9127
     if: github.event_name == 'workflow_dispatch'
 
     steps:

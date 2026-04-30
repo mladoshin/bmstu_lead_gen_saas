@@ -1,7 +1,13 @@
 import { VerifyEmailUseCase } from './verify-email.use-case';
-import { IEmailVerificationRepository, EmailVerificationEntity } from '../repositories/email-verification.repository';
+import {
+  IEmailVerificationRepository,
+  EmailVerificationEntity,
+} from '../repositories/email-verification.repository';
 import { IContactRepository, ContactEntity } from '../../contacts/repositories/contact.repository';
-import { IEmailVerificationService, EmailVerificationResult } from '../services/email-verification.service';
+import {
+  IEmailVerificationService,
+  EmailVerificationResult,
+} from '../services/email-verification.service';
 import { ContactNotFoundError, ContactAccessDeniedError } from '../domain/verification.errors';
 
 describe('VerifyEmailUseCase', () => {
@@ -72,11 +78,7 @@ describe('VerifyEmailUseCase', () => {
       verifyEmail: jest.fn(),
     };
 
-    useCase = new VerifyEmailUseCase(
-      verificationRepo,
-      contactRepo,
-      emailVerificationService,
-    );
+    useCase = new VerifyEmailUseCase(verificationRepo, contactRepo, emailVerificationService);
   });
 
   it('verifies email and saves via upsert', async () => {
@@ -115,9 +117,9 @@ describe('VerifyEmailUseCase', () => {
   it('throws ContactAccessDeniedError when userId does not match', async () => {
     contactRepo.findById.mockResolvedValue(contact);
 
-    await expect(
-      useCase.execute({ contactId, email }, 'other-user'),
-    ).rejects.toThrow(ContactAccessDeniedError);
+    await expect(useCase.execute({ contactId, email }, 'other-user')).rejects.toThrow(
+      ContactAccessDeniedError,
+    );
 
     expect(emailVerificationService.verifyEmail).not.toHaveBeenCalled();
     expect(verificationRepo.upsert).not.toHaveBeenCalled();
