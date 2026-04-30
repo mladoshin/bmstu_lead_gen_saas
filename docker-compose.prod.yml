@@ -36,6 +36,27 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
 
+  backend-canary:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: leadgen_backend_canary
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      PORT: 3000
+    ports:
+      - "127.0.0.1:3001:3000"
+    profiles:
+      - canary
+
   frontend:
     build:
       context: .
@@ -46,6 +67,8 @@ services:
       - backend
     ports:
       - "80:80"
+    volumes:
+      - ./frontend/${NGINX_CONF_FILE:-nginx.conf}:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
   postgres_data:

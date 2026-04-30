@@ -74,10 +74,10 @@ jobs:
 
 
   # ──────────────────────────────────────────────
-  # 2. Deploy to VM (Docker Compose)
+  # 2. Deploy Canary
   # ──────────────────────────────────────────────
-  deploy:
-    name: Deploy to VM
+  deploy-canary:
+    name: Deploy Canary
     needs: build-and-test
     runs-on: self-hosted
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -96,9 +96,58 @@ jobs:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
           env | grep -E '^(POSTGRES_|JWT_|OPENAI_|GOOGLE_MAPS_)' > .env
+          echo "NGINX_CONF_FILE=nginx.conf" >> .env
 
-      - name: Build and start containers
-        run: docker compose -f docker-compose.prod.yml up -d --build --force-recreate
+      - name: Build and start canary container
+        run: |
+          docker compose -f docker-compose.prod.yml --profile canary build backend-canary
+          docker compose -f docker-compose.prod.yml --profile canary up -d backend-canary
+
+      - name: Health check canary on port 3001
+        id: canary-health
+        run: |
+          sleep 10
+          for i in 1 2 3 4 5; do
+            if curl --fail --silent --max-time 10 http://localhost:3001/api/health; then
+              echo ""
+              echo "Canary health check passed on attempt $i"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          echo "Canary health check failed after 5 attempts!"
+          exit 1
+
+      - name: Rollback canary on failure
+        if: steps.canary-health.outcome == 'failure'
+        run: |
+          echo "Canary health check failed. Stopping canary..."
+          docker compose -f docker-compose.prod.yml --profile canary stop backend-canary
+          docker compose -f docker-compose.prod.yml --profile canary rm -f backend-canary
+          echo "Canary stopped. Stable backend is unaffected."
+
+      - name: Enable canary traffic via nginx
+        if: success()
+        run: |
+          sed -i 's/NGINX_CONF_FILE=nginx.conf/NGINX_CONF_FILE=nginx.canary.conf/' .env
+          docker compose -f docker-compose.prod.yml up -d --force-recreate frontend
+
+      - name: Verify health through nginx
+        if: success()
+        run: |
+          sleep 5
+          for i in 1 2 3; do
+            if curl --fail --silent --max-time 10 http://localhost/api/health; then
+              echo ""
+              echo "Nginx health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 3s..."
+            sleep 3
+          done
+          echo "Nginx health check failed after canary switch!"
+          exit 1
 
       - name: Clean up .env file
         if: always()
@@ -110,13 +159,13 @@ jobs:
   health-check:
     name: Health Check
     runs-on: self-hosted
-    needs: deploy
+    needs: deploy-canary
 
     steps:
-      - name: Wait for application startup
+      - name: Wait for stabilization
         run: sleep 15
 
-      - name: Check /api/v1/health endpoint
+      - name: Check /api/health endpoint
         run: |
           for i in 1 2 3; do
             curl --fail --silent --max-time 10 http://localhost/api/health && exit 0
