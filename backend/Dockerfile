@@ -14,6 +14,8 @@ RUN cd backend && npx prisma generate && npm run build
 
 FROM node:20-alpine
 
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 COPY backend/package.json ./
@@ -22,7 +24,7 @@ COPY backend/prisma ./prisma
 RUN npm install --omit=dev
 
 COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 3000
 

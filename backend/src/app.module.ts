@@ -9,6 +9,7 @@ import { SearchModule } from './modules/search/search.module';
 import { EmailGenerationModule } from './modules/email-generation/email-generation.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { ExportModule } from './modules/export/export.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ExportModule } from './modules/export/export.module';
     EmailGenerationModule,
     VerificationModule,
     ExportModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
