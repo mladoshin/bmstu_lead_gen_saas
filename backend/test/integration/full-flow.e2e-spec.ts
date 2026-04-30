@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 
 const VALID_USER = { email: 'flow@test.com', password: 'password123', name: 'Flow User' };
 const OTHER_USER = { email: 'other@test.com', password: 'password123', name: 'Other User' };
@@ -57,7 +58,10 @@ describe('Full Flow: Register → Login → Search → Export (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');

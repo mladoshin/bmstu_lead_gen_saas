@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 import {
   IEmailGenerationService,
   EMAIL_GENERATION_SERVICE_TOKEN,
@@ -96,6 +97,8 @@ describe('Email Generation (e2e)', () => {
       .useValue(mockEmailGenerationService)
       .overrideProvider(CONTACT_DISCOVERY_SERVICE_TOKEN)
       .useValue(mockDiscoveryService)
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
       .compile();
 
     app = moduleFixture.createNestApplication();

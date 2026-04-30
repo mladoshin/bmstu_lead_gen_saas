@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 
 const BASE_SEARCH = '/api/search';
 const BASE_SELECTIONS = '/api/selections';
@@ -30,7 +31,10 @@ describe('Selections (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
