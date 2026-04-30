@@ -1,0 +1,124 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # ──────────────────────────────────────────────
+  # 1. Build & Test
+  # ──────────────────────────────────────────────
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: leadgen_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:secret@localhost:5432/leadgen_test
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+        working-directory: backend
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy
+        working-directory: backend
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run unit tests (backend)
+        run: npm test
+        working-directory: backend
+
+      - name: Run E2E tests (backend)
+        run: npm run test:e2e
+        working-directory: backend
+
+      - name: Build all packages
+        run: npm run build
+
+
+  # ──────────────────────────────────────────────
+  # 2. Deploy to VM (Docker Compose)
+  # ──────────────────────────────────────────────
+  deploy:
+    name: Deploy to VM
+    runs-on: self-hosted
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          env | grep -E '^(POSTGRES_|JWT_|OPENAI_|GOOGLE_MAPS_)' > .env
+
+      - name: Build and start containers
+        run: docker compose -f docker-compose.prod.yml up -d --build --force-recreate
+
+      - name: Clean up .env file
+        if: always()
+        run: rm -f .env
+
+  # ──────────────────────────────────────────────
+  # 3. Health Check
+  # ──────────────────────────────────────────────
+  health-check:
+    name: Health Check
+    runs-on: self-hosted
+    needs: deploy
+
+    steps:
+      - name: Wait for application startup
+        run: sleep 15
+
+      - name: Check /api/v1/health endpoint
+        run: |
+          for i in 1 2 3; do
+            curl --fail --silent --max-time 10 http://localhost/api/v1/health && exit 0
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          echo "Health check failed after 3 attempts!"
+          exit 1
