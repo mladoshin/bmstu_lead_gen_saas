@@ -26,10 +26,7 @@ export class VerifyEmailUseCase {
     private readonly emailVerificationService: IEmailVerificationService,
   ) {}
 
-  async execute(
-    dto: VerifyEmailDto,
-    userId: string,
-  ): Promise<EmailVerificationEntity> {
+  async execute(dto: VerifyEmailDto, userId: string): Promise<EmailVerificationEntity> {
     const contact = await this.contactRepo.findById(dto.contactId);
     if (!contact) {
       throw new ContactNotFoundError(dto.contactId);

@@ -1,5 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IContactRepository, CONTACT_REPOSITORY_TOKEN, ContactEntity } from '../repositories/contact.repository';
+import {
+  IContactRepository,
+  CONTACT_REPOSITORY_TOKEN,
+  ContactEntity,
+} from '../repositories/contact.repository';
 
 @Injectable()
 export class GetContactUseCase {

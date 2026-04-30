@@ -25,7 +25,9 @@ export class OpenAIEmailGenerationService implements IEmailGenerationService {
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is not configured. Cannot start OpenAIEmailGenerationService.');
+      throw new Error(
+        'OPENAI_API_KEY is not configured. Cannot start OpenAIEmailGenerationService.',
+      );
     }
     this.client = new OpenAI({ apiKey });
   }
@@ -56,7 +58,9 @@ Use lowercase for the email. Return only the single most likely email.`;
 
       const content = response.choices[0]?.message?.content;
       if (!content) {
-        this.logger.warn(`Empty response from OpenAI for ${contact.firstName} ${contact.lastName}@${domain}`);
+        this.logger.warn(
+          `Empty response from OpenAI for ${contact.firstName} ${contact.lastName}@${domain}`,
+        );
         return null;
       }
 

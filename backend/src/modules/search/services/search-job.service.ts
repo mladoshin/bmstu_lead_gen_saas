@@ -71,7 +71,7 @@ export class SearchJobService implements ISearchJobService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async runSearchJob(selection: SelectionEntity, dto: SearchCompaniesDto): Promise<void> {
@@ -81,7 +81,7 @@ export class SearchJobService implements ISearchJobService {
       raw.push(...places);
     }
 
-    const withDomains = raw.map(c => ({
+    const withDomains = raw.map((c) => ({
       ...c,
       domain: c.website ? SearchUtils.extractDomain(c.website) : undefined,
     }));

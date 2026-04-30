@@ -1,5 +1,9 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { ICompanyRepository, COMPANY_REPOSITORY_TOKEN, CompanyEntity } from '../repositories/company.repository';
+import {
+  ICompanyRepository,
+  COMPANY_REPOSITORY_TOKEN,
+  CompanyEntity,
+} from '../repositories/company.repository';
 import { UpdateCompanyDto } from '../dto/update-company.dto';
 
 @Injectable()

@@ -3,12 +3,14 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 
 const VALID_USER = { email: 'flow@test.com', password: 'password123', name: 'Flow User' };
 const OTHER_USER = { email: 'other@test.com', password: 'password123', name: 'Other User' };
 const VALID_SEARCH_DTO = { cities: ['Москва', 'Санкт-Петербург'], industry: 'IT', companyLimit: 5 };
 
-const CSV_HEADERS = 'id,name,industry,city,website,domain,phone,email_general,country,address,source';
+const CSV_HEADERS =
+  'id,name,industry,city,website,domain,phone,email_general,country,address,source';
 
 describe('Full Flow: Register → Login → Search → Export (e2e)', () => {
   let app: INestApplication;
@@ -29,7 +31,11 @@ describe('Full Flow: Register → Login → Search → Export (e2e)', () => {
       .send(VALID_SEARCH_DTO);
   }
 
-  async function createCompany(token: string, selectionId: string, overrides: Record<string, unknown> = {}) {
+  async function createCompany(
+    token: string,
+    selectionId: string,
+    overrides: Record<string, unknown> = {},
+  ) {
     return request(app.getHttpServer())
       .post('/api/companies')
       .set('Authorization', `Bearer ${token}`)
@@ -52,7 +58,10 @@ describe('Full Flow: Register → Login → Search → Export (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
@@ -185,8 +194,9 @@ describe('Full Flow: Register → Login → Search → Export (e2e)', () => {
   });
 
   it('401 без Authorization header', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/api/export/companies/csv?selectionId=00000000-0000-0000-0000-000000000000');
+    const res = await request(app.getHttpServer()).get(
+      '/api/export/companies/csv?selectionId=00000000-0000-0000-0000-000000000000',
+    );
 
     expect(res.status).toBe(401);
   });

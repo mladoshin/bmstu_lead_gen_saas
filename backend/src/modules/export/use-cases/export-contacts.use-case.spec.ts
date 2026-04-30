@@ -81,9 +81,7 @@ describe('ExportContactsUseCase', () => {
 
   it('should return CSV on successful export', async () => {
     selectionReader.findById.mockResolvedValue(makeSelection());
-    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([
-      { id: 'comp-1' } as CompanyEntity,
-    ]);
+    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([{ id: 'comp-1' } as CompanyEntity]);
     contactRepo.findByCompanyIds.mockResolvedValue([
       {
         id: 'c1',

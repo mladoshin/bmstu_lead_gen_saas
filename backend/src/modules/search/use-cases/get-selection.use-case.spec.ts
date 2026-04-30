@@ -44,9 +44,7 @@ describe('GetSelectionUseCase', () => {
   it('throws NotFoundException when selection is not found', async () => {
     selectionReader.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('non-existent', 'user-1')).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(useCase.execute('non-existent', 'user-1')).rejects.toThrow(NotFoundException);
   });
 
   it('throws ForbiddenException when userId does not match', async () => {
@@ -54,8 +52,6 @@ describe('GetSelectionUseCase', () => {
 
     selectionReader.findById.mockResolvedValue(selection);
 
-    await expect(useCase.execute('sel-1', 'other-user')).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(useCase.execute('sel-1', 'other-user')).rejects.toThrow(ForbiddenException);
   });
 });

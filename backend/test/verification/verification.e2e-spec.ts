@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { SEARCH_JOB_SERVICE_TOKEN } from '../../src/modules/search/services/search-job.service';
 import {
   IEmailVerificationService,
   EMAIL_VERIFICATION_SERVICE_TOKEN,
@@ -48,9 +49,7 @@ describe('Verification (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 
@@ -111,6 +110,8 @@ describe('Verification (e2e)', () => {
       .useValue(mockDiscoveryService)
       .overrideProvider(EMAIL_GENERATION_SERVICE_TOKEN)
       .useValue(mockEmailGenService)
+      .overrideProvider(SEARCH_JOB_SERVICE_TOKEN)
+      .useValue({ enqueue: () => {} })
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -230,9 +231,7 @@ describe('Verification (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ contactId: contact.id, email: 'specific@example.com' });
 
-      expect(mockEmailVerificationService.verifyEmail).toHaveBeenCalledWith(
-        'specific@example.com',
-      );
+      expect(mockEmailVerificationService.verifyEmail).toHaveBeenCalledWith('specific@example.com');
     });
 
     it('404 при несуществующем contactId', async () => {
@@ -293,12 +292,10 @@ describe('Verification (e2e)', () => {
     });
 
     it('401 без токена', async () => {
-      const res = await request(app.getHttpServer())
-        .post(`${BASE_VERIFICATION}/verify`)
-        .send({
-          contactId: '00000000-0000-0000-0000-000000000000',
-          email: 'test@test.com',
-        });
+      const res = await request(app.getHttpServer()).post(`${BASE_VERIFICATION}/verify`).send({
+        contactId: '00000000-0000-0000-0000-000000000000',
+        email: 'test@test.com',
+      });
 
       expect(res.status).toBe(401);
     });

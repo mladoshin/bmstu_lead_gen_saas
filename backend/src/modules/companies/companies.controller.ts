@@ -34,7 +34,10 @@ export class CompaniesController {
   ) {}
 
   @Get()
-  async findAll(@Query('selectionId') selectionId: string | undefined, @Request() req: { user: JwtPayload }) {
+  async findAll(
+    @Query('selectionId') selectionId: string | undefined,
+    @Request() req: { user: JwtPayload },
+  ) {
     const companies = await this.getCompaniesUseCase.execute(req.user.sub, selectionId);
     return this.companyMapper.toResponseList(companies);
   }
@@ -52,7 +55,11 @@ export class CompaniesController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateCompanyDto, @Request() req: { user: JwtPayload }) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCompanyDto,
+    @Request() req: { user: JwtPayload },
+  ) {
     const company = await this.updateCompanyUseCase.execute(id, dto, req.user.sub);
     return this.companyMapper.toResponse(company);
   }

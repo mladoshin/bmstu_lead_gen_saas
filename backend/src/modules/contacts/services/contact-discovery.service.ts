@@ -81,23 +81,31 @@ For each person found, return:
 
 Return JSON: {"contacts": [...]}
 Only include people with confidenceScore >= 0.3.
-If no contacts found, return {"contacts": []}.`;
+If no contacts found, return {"contacts": []}.
+
+IMPORTANT: Your response MUST be ONLY valid JSON, nothing else. No explanations, no markdown, no text before or after. Just the JSON object {"contacts": [...]}.
+If you cannot find any contacts, respond with exactly: {"contacts": []}`;
 
     try {
       const response = await this.client.responses.create({
         model: 'gpt-4o-mini',
         tools: [{ type: 'web_search_preview' }],
         input: prompt,
-        text: { format: { type: 'json_object' } },
       });
 
       const content = response.output_text;
 
       let parsed: { contacts?: unknown[] };
       try {
-        parsed = JSON.parse(content) as { contacts?: unknown[] };
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error('No JSON object found in response');
+        }
+        parsed = JSON.parse(jsonMatch[0]) as { contacts?: unknown[] };
       } catch {
-        this.logger.error(`Failed to parse OpenAI response as JSON for company "${company.name}": ${content.substring(0, 200)}`);
+        this.logger.warn(
+          `Failed to parse OpenAI response as JSON for company "${company.name}": ${content.substring(0, 200)}`,
+        );
         return [];
       }
 
