@@ -149,12 +149,8 @@ describe('GenerateEmailsUseCase', () => {
   });
 
   it('should skip contact if email already exists', async () => {
-    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([
-      makeCompany({ domain: 'acme.com' }),
-    ]);
-    contactRepo.findByCompanyId.mockResolvedValue([
-      makeContact({ email: 'existing@acme.com' }),
-    ]);
+    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([makeCompany({ domain: 'acme.com' })]);
+    contactRepo.findByCompanyId.mockResolvedValue([makeContact({ email: 'existing@acme.com' })]);
 
     const result = await useCase.execute(dto, userId);
 
@@ -163,11 +159,12 @@ describe('GenerateEmailsUseCase', () => {
   });
 
   it('should update contact if generateEmail returns result', async () => {
-    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([
-      makeCompany({ domain: 'acme.com' }),
-    ]);
+    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([makeCompany({ domain: 'acme.com' })]);
     contactRepo.findByCompanyId.mockResolvedValue([makeContact()]);
-    emailGenService.generateEmail.mockResolvedValue({ email: 'john.doe@acme.com', confidence: 0.85 });
+    emailGenService.generateEmail.mockResolvedValue({
+      email: 'john.doe@acme.com',
+      confidence: 0.85,
+    });
     contactRepo.update.mockResolvedValue(makeContact({ email: 'john.doe@acme.com' }));
 
     const result = await useCase.execute(dto, userId);
@@ -178,9 +175,7 @@ describe('GenerateEmailsUseCase', () => {
   });
 
   it('should not update if generateEmail returns null', async () => {
-    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([
-      makeCompany({ domain: 'acme.com' }),
-    ]);
+    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([makeCompany({ domain: 'acme.com' })]);
     contactRepo.findByCompanyId.mockResolvedValue([makeContact()]);
     emailGenService.generateEmail.mockResolvedValue(null);
 
@@ -192,9 +187,7 @@ describe('GenerateEmailsUseCase', () => {
   });
 
   it('should log error and continue on exception', async () => {
-    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([
-      makeCompany({ domain: 'acme.com' }),
-    ]);
+    companyRepo.findBySelectionIdAndUserId.mockResolvedValue([makeCompany({ domain: 'acme.com' })]);
     contactRepo.findByCompanyId.mockResolvedValue([
       makeContact({ id: 'c1', email: null }),
       makeContact({ id: 'c2', email: null, firstName: 'Jane' }),
@@ -217,7 +210,10 @@ describe('GenerateEmailsUseCase', () => {
     ]);
     contactRepo.findByCompanyId
       .mockResolvedValueOnce([makeContact({ id: 'c1', email: null })])
-      .mockResolvedValueOnce([makeContact({ id: 'c2', email: null }), makeContact({ id: 'c3', email: 'exists@b.com' })]);
+      .mockResolvedValueOnce([
+        makeContact({ id: 'c2', email: null }),
+        makeContact({ id: 'c3', email: 'exists@b.com' }),
+      ]);
     emailGenService.generateEmail
       .mockResolvedValueOnce({ email: 'x@a.com', confidence: 0.9 })
       .mockResolvedValueOnce(null);

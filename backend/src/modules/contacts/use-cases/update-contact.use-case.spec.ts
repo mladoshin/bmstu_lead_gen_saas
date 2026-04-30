@@ -62,9 +62,9 @@ describe('UpdateContactUseCase', () => {
   it('throws NotFoundException when contact not found', async () => {
     contactRepo.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute('non-existent', { email: 'test@example.com' }),
-    ).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('non-existent', { email: 'test@example.com' })).rejects.toThrow(
+      NotFoundException,
+    );
 
     expect(contactRepo.update).not.toHaveBeenCalled();
   });

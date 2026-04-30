@@ -103,7 +103,9 @@ If you cannot find any contacts, respond with exactly: {"contacts": []}`;
         }
         parsed = JSON.parse(jsonMatch[0]) as { contacts?: unknown[] };
       } catch {
-        this.logger.warn(`Failed to parse OpenAI response as JSON for company "${company.name}": ${content.substring(0, 200)}`);
+        this.logger.warn(
+          `Failed to parse OpenAI response as JSON for company "${company.name}": ${content.substring(0, 200)}`,
+        );
         return [];
       }
 

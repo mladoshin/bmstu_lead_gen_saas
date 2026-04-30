@@ -50,16 +50,12 @@ describe('GetCompanyUseCase', () => {
   it('should throw NotFoundException when company not found', async () => {
     repo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('comp-999', 'user-1')).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(useCase.execute('comp-999', 'user-1')).rejects.toThrow(NotFoundException);
   });
 
   it('should throw ForbiddenException when userId does not match', async () => {
     repo.findById.mockResolvedValue(company);
 
-    await expect(useCase.execute('comp-1', 'other-user')).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(useCase.execute('comp-1', 'other-user')).rejects.toThrow(ForbiddenException);
   });
 });

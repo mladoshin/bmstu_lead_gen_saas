@@ -48,9 +48,7 @@ describe('Verification (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 
@@ -230,9 +228,7 @@ describe('Verification (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ contactId: contact.id, email: 'specific@example.com' });
 
-      expect(mockEmailVerificationService.verifyEmail).toHaveBeenCalledWith(
-        'specific@example.com',
-      );
+      expect(mockEmailVerificationService.verifyEmail).toHaveBeenCalledWith('specific@example.com');
     });
 
     it('404 при несуществующем contactId', async () => {
@@ -293,12 +289,10 @@ describe('Verification (e2e)', () => {
     });
 
     it('401 без токена', async () => {
-      const res = await request(app.getHttpServer())
-        .post(`${BASE_VERIFICATION}/verify`)
-        .send({
-          contactId: '00000000-0000-0000-0000-000000000000',
-          email: 'test@test.com',
-        });
+      const res = await request(app.getHttpServer()).post(`${BASE_VERIFICATION}/verify`).send({
+        contactId: '00000000-0000-0000-0000-000000000000',
+        email: 'test@test.com',
+      });
 
       expect(res.status).toBe(401);
     });

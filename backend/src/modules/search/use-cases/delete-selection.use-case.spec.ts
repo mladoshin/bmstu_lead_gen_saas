@@ -1,6 +1,10 @@
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { DeleteSelectionUseCase } from './delete-selection.use-case';
-import { ISelectionReader, ISelectionWriter, SelectionEntity } from '../repositories/selection.repository';
+import {
+  ISelectionReader,
+  ISelectionWriter,
+  SelectionEntity,
+} from '../repositories/selection.repository';
 
 const makeSelectionReader = (): jest.Mocked<ISelectionReader> => ({
   findById: jest.fn(),
@@ -53,9 +57,7 @@ describe('DeleteSelectionUseCase', () => {
   it('throws NotFoundException when selection is not found', async () => {
     selectionReader.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('non-existent', 'user-1')).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(useCase.execute('non-existent', 'user-1')).rejects.toThrow(NotFoundException);
     expect(selectionWriter.delete).not.toHaveBeenCalled();
   });
 
@@ -64,9 +66,7 @@ describe('DeleteSelectionUseCase', () => {
 
     selectionReader.findById.mockResolvedValue(selection);
 
-    await expect(useCase.execute('sel-1', 'other-user')).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(useCase.execute('sel-1', 'other-user')).rejects.toThrow(ForbiddenException);
     expect(selectionWriter.delete).not.toHaveBeenCalled();
   });
 });

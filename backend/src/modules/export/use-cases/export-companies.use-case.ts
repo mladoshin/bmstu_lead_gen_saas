@@ -1,10 +1,31 @@
 import { Inject, Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { ISelectionReader, SELECTION_READER_TOKEN } from '../../search/repositories/selection.repository';
-import { ISelectionWriter, SELECTION_WRITER_TOKEN } from '../../search/repositories/selection.repository';
-import { ICompanyRepository, COMPANY_REPOSITORY_TOKEN } from '../../companies/repositories/company.repository';
+import {
+  ISelectionReader,
+  SELECTION_READER_TOKEN,
+} from '../../search/repositories/selection.repository';
+import {
+  ISelectionWriter,
+  SELECTION_WRITER_TOKEN,
+} from '../../search/repositories/selection.repository';
+import {
+  ICompanyRepository,
+  COMPANY_REPOSITORY_TOKEN,
+} from '../../companies/repositories/company.repository';
 import { ExportMapper } from '../mappers/export.mapper';
 
-const HEADERS = ['id', 'name', 'industry', 'city', 'website', 'domain', 'phone', 'email_general', 'country', 'address', 'source'];
+const HEADERS = [
+  'id',
+  'name',
+  'industry',
+  'city',
+  'website',
+  'domain',
+  'phone',
+  'email_general',
+  'country',
+  'address',
+  'source',
+];
 
 @Injectable()
 export class ExportCompaniesUseCase {

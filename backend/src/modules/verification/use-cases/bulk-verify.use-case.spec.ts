@@ -3,7 +3,10 @@ import { BulkVerifyUseCase } from './bulk-verify.use-case';
 import { IEmailVerificationRepository } from '../repositories/email-verification.repository';
 import { ICompanyRepository, CompanyEntity } from '../../companies/repositories/company.repository';
 import { IContactRepository, ContactEntity } from '../../contacts/repositories/contact.repository';
-import { IEmailVerificationService, EmailVerificationResult } from '../services/email-verification.service';
+import {
+  IEmailVerificationService,
+  EmailVerificationResult,
+} from '../services/email-verification.service';
 
 jest.spyOn(Logger.prototype, 'error').mockImplementation();
 
@@ -34,11 +37,7 @@ describe('BulkVerifyUseCase', () => {
     createdAt: new Date('2025-01-01'),
   });
 
-  const makeContact = (
-    id: string,
-    companyId: string,
-    email: string | null,
-  ): ContactEntity => ({
+  const makeContact = (id: string, companyId: string, email: string | null): ContactEntity => ({
     id,
     companyId,
     userId,
@@ -173,19 +172,14 @@ describe('BulkVerifyUseCase', () => {
     const company1 = makeCompany('c1');
     const company2 = makeCompany('c2');
 
-    const contacts1 = [
-      makeContact('ct1', 'c1', 'a@example.com'),
-      makeContact('ct2', 'c1', null),
-    ];
+    const contacts1 = [makeContact('ct1', 'c1', 'a@example.com'), makeContact('ct2', 'c1', null)];
     const contacts2 = [
       makeContact('ct3', 'c2', 'b@example.com'),
       makeContact('ct4', 'c2', 'c@example.com'),
     ];
 
     companyRepo.findBySelectionIdAndUserId.mockResolvedValue([company1, company2]);
-    contactRepo.findByCompanyId
-      .mockResolvedValueOnce(contacts1)
-      .mockResolvedValueOnce(contacts2);
+    contactRepo.findByCompanyId.mockResolvedValueOnce(contacts1).mockResolvedValueOnce(contacts2);
     emailVerificationService.verifyEmail
       .mockResolvedValueOnce(validResult)
       .mockResolvedValueOnce(invalidResult)

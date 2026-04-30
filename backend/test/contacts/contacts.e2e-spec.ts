@@ -3,7 +3,11 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
-import { CONTACT_DISCOVERY_SERVICE_TOKEN, IContactDiscoveryService, DiscoveredContact } from '../../src/modules/contacts/services/contact-discovery.service';
+import {
+  CONTACT_DISCOVERY_SERVICE_TOKEN,
+  IContactDiscoveryService,
+  DiscoveredContact,
+} from '../../src/modules/contacts/services/contact-discovery.service';
 
 const BASE_CONTACTS = '/api/contacts';
 const BASE_SEARCH = '/api/search';
@@ -42,9 +46,7 @@ describe('Contacts (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 
@@ -64,7 +66,11 @@ describe('Contacts (e2e)', () => {
     return res.body;
   }
 
-  async function createContact(token: string, companyId: string, overrides: Record<string, unknown> = {}) {
+  async function createContact(
+    token: string,
+    companyId: string,
+    overrides: Record<string, unknown> = {},
+  ) {
     return request(app.getHttpServer())
       .post(BASE_CONTACTS)
       .set('Authorization', `Bearer ${token}`)
@@ -102,7 +108,9 @@ describe('Contacts (e2e)', () => {
 
   beforeEach(async () => {
     (mockDiscoveryService.discoverContacts as jest.Mock).mockClear();
-    (mockDiscoveryService.discoverContacts as jest.Mock).mockResolvedValue(MOCK_DISCOVERED_CONTACTS);
+    (mockDiscoveryService.discoverContacts as jest.Mock).mockResolvedValue(
+      MOCK_DISCOVERED_CONTACTS,
+    );
     await prisma.contact.deleteMany();
     await prisma.company.deleteMany();
     await prisma.selection.deleteMany();
@@ -190,15 +198,13 @@ describe('Contacts (e2e)', () => {
     });
 
     it('401 без токена', async () => {
-      const res = await request(app.getHttpServer())
-        .post(BASE_CONTACTS)
-        .send({
-          companyId: '00000000-0000-0000-0000-000000000000',
-          firstName: 'Алексей',
-          lastName: 'Иванов',
-          position: 'Manager',
-          source: 'manual',
-        });
+      const res = await request(app.getHttpServer()).post(BASE_CONTACTS).send({
+        companyId: '00000000-0000-0000-0000-000000000000',
+        firstName: 'Алексей',
+        lastName: 'Иванов',
+        position: 'Manager',
+        source: 'manual',
+      });
 
       expect(res.status).toBe(401);
     });
@@ -232,8 +238,9 @@ describe('Contacts (e2e)', () => {
     });
 
     it('401 без токена', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`${BASE_CONTACTS}/00000000-0000-0000-0000-000000000000`);
+      const res = await request(app.getHttpServer()).get(
+        `${BASE_CONTACTS}/00000000-0000-0000-0000-000000000000`,
+      );
 
       expect(res.status).toBe(401);
     });
@@ -302,8 +309,9 @@ describe('Contacts (e2e)', () => {
     });
 
     it('401 без токена', async () => {
-      const res = await request(app.getHttpServer())
-        .delete(`${BASE_CONTACTS}/00000000-0000-0000-0000-000000000000`);
+      const res = await request(app.getHttpServer()).delete(
+        `${BASE_CONTACTS}/00000000-0000-0000-0000-000000000000`,
+      );
 
       expect(res.status).toBe(401);
     });
@@ -404,7 +412,9 @@ describe('Contacts (e2e)', () => {
     });
 
     it('201 + пустой массив при ошибке discovery сервиса (graceful degradation)', async () => {
-      (mockDiscoveryService.discoverContacts as jest.Mock).mockRejectedValueOnce(new Error('OpenAI API error'));
+      (mockDiscoveryService.discoverContacts as jest.Mock).mockRejectedValueOnce(
+        new Error('OpenAI API error'),
+      );
 
       const token = await register();
       const selectionId = await createSelection(token);

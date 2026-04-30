@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { promises as dns } from 'dns';
 import * as net from 'net';
 import { randomUUID } from 'crypto';
-import {
-  IEmailVerificationService,
-  EmailVerificationResult,
-} from './email-verification.service';
+import { IEmailVerificationService, EmailVerificationResult } from './email-verification.service';
 
 const SMTP_TIMEOUT = 10_000;
 
@@ -56,9 +53,7 @@ export class DnsSmtpEmailVerificationService implements IEmailVerificationServic
         confidenceScore,
       };
     } catch (err) {
-      this.logger.error(
-        `Unexpected error verifying "${email}": ${(err as Error).message}`,
-      );
+      this.logger.error(`Unexpected error verifying "${email}": ${(err as Error).message}`);
       return {
         isValid: false,
         mxFound: false,
@@ -114,10 +109,7 @@ export class DnsSmtpEmailVerificationService implements IEmailVerificationServic
         return { smtpCheck: false, catchAll: false, greylisted: false };
       }
 
-      const rcptResponse = await this.sendCommand(
-        socket,
-        `RCPT TO:<${email}>\r\n`,
-      );
+      const rcptResponse = await this.sendCommand(socket, `RCPT TO:<${email}>\r\n`);
       const rcptCode = this.parseResponseCode(rcptResponse);
 
       if (rcptCode >= 400 && rcptCode < 500) {
@@ -142,15 +134,11 @@ export class DnsSmtpEmailVerificationService implements IEmailVerificationServic
         (err as Error).message === 'Socket timeout';
 
       if (isNetworkError) {
-        this.logger.warn(
-          `SMTP connection failed to ${mxHost}: ${code ?? (err as Error).message}`,
-        );
+        this.logger.warn(`SMTP connection failed to ${mxHost}: ${code ?? (err as Error).message}`);
         return { smtpCheck: false, catchAll: false, greylisted: true };
       }
 
-      this.logger.error(
-        `Unexpected SMTP error for ${mxHost}: ${(err as Error).message}`,
-      );
+      this.logger.error(`Unexpected SMTP error for ${mxHost}: ${(err as Error).message}`);
       return { smtpCheck: false, catchAll: false, greylisted: false };
     } finally {
       if (socket) {
@@ -164,10 +152,7 @@ export class DnsSmtpEmailVerificationService implements IEmailVerificationServic
     }
   }
 
-  private async detectCatchAll(
-    socket: net.Socket,
-    domain: string,
-  ): Promise<boolean> {
+  private async detectCatchAll(socket: net.Socket, domain: string): Promise<boolean> {
     try {
       const rsetResponse = await this.sendCommand(socket, 'RSET\r\n');
       if (this.parseResponseCode(rsetResponse) !== 250) {
@@ -180,10 +165,7 @@ export class DnsSmtpEmailVerificationService implements IEmailVerificationServic
       }
 
       const fakeEmail = `${randomUUID()}@${domain}`;
-      const rcptResponse = await this.sendCommand(
-        socket,
-        `RCPT TO:<${fakeEmail}>\r\n`,
-      );
+      const rcptResponse = await this.sendCommand(socket, `RCPT TO:<${fakeEmail}>\r\n`);
       const rcptCode = this.parseResponseCode(rcptResponse);
 
       return rcptCode === 250;

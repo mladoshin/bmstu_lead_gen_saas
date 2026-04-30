@@ -4,10 +4,7 @@ import {
   SELECTION_WRITER_TOKEN,
   SelectionEntity,
 } from '../repositories/selection.repository';
-import {
-  ISearchJobService,
-  SEARCH_JOB_SERVICE_TOKEN,
-} from '../services/search-job.service';
+import { ISearchJobService, SEARCH_JOB_SERVICE_TOKEN } from '../services/search-job.service';
 import { SearchCompaniesDto } from '../dto/search-companies.dto';
 
 @Injectable()

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { IContactStore } from '@/core/ports/contact-store.port';
 import type { IContactPort } from '@/core/ports/contact.port';
-import type { DiscoverContactsRequest } from '@/core/types/contact.types';
 import { normalizeError } from '@/core/utils/normalize-error';
 
 export function createContactStore(contactPort: IContactPort) {

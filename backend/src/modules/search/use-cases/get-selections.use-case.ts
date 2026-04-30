@@ -1,5 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ISelectionReader, SELECTION_READER_TOKEN, SelectionEntity } from '../repositories/selection.repository';
+import {
+  ISelectionReader,
+  SELECTION_READER_TOKEN,
+  SelectionEntity,
+} from '../repositories/selection.repository';
 
 @Injectable()
 export class GetSelectionsUseCase {

@@ -37,9 +37,7 @@ describe('Email Generation (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 

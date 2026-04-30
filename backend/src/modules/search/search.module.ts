@@ -12,18 +12,12 @@ import {
   SELECTION_WRITER_TOKEN,
 } from './repositories/selection.repository';
 import { PrismaSelectionRepository } from './repositories/prisma-selection.repository';
-import {
-  GOOGLE_PLACES_SERVICE_TOKEN,
-  GooglePlacesService,
-} from './services/google-places.service';
+import { GOOGLE_PLACES_SERVICE_TOKEN, GooglePlacesService } from './services/google-places.service';
 import {
   OPENAI_ENRICHMENT_SERVICE_TOKEN,
   OpenAIEnrichmentService,
 } from './services/openai-enrichment.service';
-import {
-  SEARCH_JOB_SERVICE_TOKEN,
-  SearchJobService,
-} from './services/search-job.service';
+import { SEARCH_JOB_SERVICE_TOKEN, SearchJobService } from './services/search-job.service';
 import { CompaniesModule } from '../companies/companies.module';
 
 @Module({

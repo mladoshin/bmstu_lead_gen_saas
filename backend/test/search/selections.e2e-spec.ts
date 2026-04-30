@@ -16,9 +16,7 @@ describe('Selections (e2e)', () => {
   let prisma: PrismaService;
 
   async function register(body = VALID_USER): Promise<string> {
-    const res = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(body);
+    const res = await request(app.getHttpServer()).post('/api/auth/register').send(body);
     return res.body.accessToken as string;
   }
 
@@ -172,8 +170,7 @@ describe('Selections (e2e)', () => {
 
     it('401 без токена', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const res = await request(app.getHttpServer())
-        .get(`${BASE_SELECTIONS}/${nonExistentId}`);
+      const res = await request(app.getHttpServer()).get(`${BASE_SELECTIONS}/${nonExistentId}`);
 
       expect(res.status).toBe(401);
     });
@@ -220,8 +217,7 @@ describe('Selections (e2e)', () => {
 
     it('401 без токена', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const res = await request(app.getHttpServer())
-        .delete(`${BASE_SELECTIONS}/${nonExistentId}`);
+      const res = await request(app.getHttpServer()).delete(`${BASE_SELECTIONS}/${nonExistentId}`);
 
       expect(res.status).toBe(401);
     });
